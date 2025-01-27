@@ -18,10 +18,10 @@ Technologies: R, Plotly, Machine Learning
 Highlights: Analyzed historical data, developed models to predict flu trends considering climate factors.  
 
 ## Skills and Technologies
-**Programming Languages:** Python, R, Bash
-**Frameworks and Libraries:** Plotly Dash, Scikit-learn, NumPy, Pandas
-**Tools and Platforms:** Google Cloud Platform, Git, GitHub
-**Areas of Expertise:** Data Analytics, Predictive Modeling, Machine Learning, Computational Simulation
+**Programming Languages:** Python, R, Bash  
+**Frameworks and Libraries:** Plotly Dash, Scikit-learn, NumPy, Pandas  
+**Tools and Platforms:** Google Cloud Platform, Git, GitHub  
+**Areas of Expertise:** Data Analytics, Predictive Modeling, Machine Learning, Computational Simulation  
 
 ## About Me
 I'm a Master's student in Industrial and Operations Engineering and Data Science at the University of Michigan. My focus areas include Human Factors Engineering, Data Analytics, and exploring the intersection of technology and healthcare to improve decision-making and patient outcomes.
