@@ -1,0 +1,1944 @@
+---
+title: "Climate & Contagion: Examining the Effects of Global Warming on Flu Incidence in the United States"
+author: |
+  <h3>Nikki Watson</h3>
+  <h4>UMich ID: #### - 6582</h4>
+  <h5>nikkiwat@umich.edu</h5>
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    theme: spacelab
+    highlight: tango
+    toc: yes
+    number_sections: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+    code_folding: show
+    self_contained: yes
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  word_document:
+    toc: yes
+    toc_depth: 3
+tags:
+- DSPA
+- SOCR
+- MIDAS
+- Big Data
+- Predictive Analytics
+- Climate Change
+- Public Health
+- Influenza
+subtitle: "<h2>Fall 2024, DSPA (HS650)</h2>"
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      include = FALSE)
+```
+
+# Abstract
+
+Given the escalating effects of climate change, understanding the impact on infectious diseases is of critical importance. This study explores the relationship between climate change and influenza incidence by analyzing historical disease rates and meteorological data spanning from 1997 to 2024. The primary objectives were to identify correlations between climate factors and flu incidences, develop and validate predictive models, and assess their ability to forecast influenza trends beyond one year. Two phases of analysis, yearly and monthly, demonstrated different correlations for the percentage of the population testing positive for flu, as well as varying accuracy and generality of predictive models. Monthly data analysis revealed stronger correlations and the models outperformed the yearly models. Future projections suggest a decrease in influenza incidence with an increase in extreme weather patterns over the coming decades. Future research incorporating comprehensive meteorological data and accurate population forecasting is imperative. 
+
+# Introduction
+  
+Along with commonly known effects of climate change, such as melting polar ice caps, extreme temperatures, and rising ocean levels, there is another possibility that is less well-known (Flahault et al., 2016). The nexus between global climate change and the incidence of infectious diseases has emerged as a critical area of study, however, the relationship between climate change and respiratory infections such as influenza remains less understood. A thorough understanding of this relationship is crucial for enhancing the preparedness and resilience of medical and public health systems against annual and pandemic-level influenza threats (Lane et al., 2022).  
+  
+Evidence has emerged that reveals that infectious disease incidence is influenced by seasonal drivers such temperature, humidity, and contact patterns (Axelsen et al., 2014). The complexity of these factors makes it difficult to conduct and understand long term predictions of infectious diseases to any degree of accuracy. Subsequently, there are varying conclusions on the effects of climate change on influenza incidence and prevalence. In a yet-to-be-peer reviewed study in 2021, they conclude that climate change "generally acts to reduce the intensity of influenza epidemics" due to the increase of specific humidity having a buffering effect on respiratory disease. However, the reduction in intensity of epidemics is offset by an increased persistence of seasonal epidemics; concluding that although the severity of incidence of influenza might decrease, these epidemics would be constant (Baker et al., 2021). These factors also very between states. Each state has a humidity threshold beyond which the influenza incidence increases significantly (Serman et al., 2022; Lee & Wang, 2022). There is a correlation with influenza incidences peaking in the colder winter months (Axelsen et al., 2014). 
+
+There is a very real and present concern that as temperatures become more extreme with climate change, that epidemics and pandemics will become more frequent (Bolles, 2024). Record breaking heat, flooding, droughts, and high rains all result from warming cycles that have been increasing since the Industrial Revolution (Bolles, 2024). Beyond the inherent rise in mortality with extreme temperature implications, infectious disease epidemics will change as well, causing significant effects in areas that historically do not see a lot of incidence or worsening the intensity of existing patterns (Ebi et al., 2021).  
+
+Current predictive models that look at climate and influenza have very little predictive power beyond one year (Axelsen et al., 2014). Many models that predict future influenza outbreaks focus on novel strains that may arise. These models are used in decisions about which flu vaccines to distribute to the public. If these models are incorrect, there are significant implications for mortality, as was seen with the H1N1 pandemic in 2009 (Ebi et al., 2021; Jilani et al., 2024). Previous models have been accurate in predicting influenza incidence in relatively stable climatic areas such as tropical climates and temperate climates (Morris et al., 2018). The broad application of predictive models is validated, however, given the various factors that are included in both meteorological data and incidence data, creating an accurate model that can predict years into the future is imperative.  
+  
+The objective of this project is to analyze historical influenza data to identify seasonal patterns and critical factors that impact the severity and timing of influenza outbreaks. Additionally, predictive models to forecast future influenza trends and outbreaks will be developed and validated. This data will be analyzed for future use, beyond one year. Three hypotheses are being examined in this study:  
+  
+1. There will be a correlation between meteorological data and flu incidence.  
+  
+2. The testing and validation of multiple predictive models will validate their use in this domain.  
+  
+3. These models will be able to predict future data beyond one year.  
+  
+
+# Methods
+
+Two stages of testing occurred to identify what data is needed to accurately predict future epidemics and inform reporting standards of current flu incidences. The first stage included yearly data that was aggregated from each month. Average temperature for the year were evaluated against average total incidences in that year to determine future incidence rates for the years 1997 - 2024. The second stage evaluated monthly data. The total incidence, average temperature, and percent of the population positive for influenza were analyzed per month for the years 1997 - 2024. 
+  
+First, data was cleaned, parsed, and prepared as outlined below. Then, trends of both datasets were examined using graphical visuals made with plotly in R. After individual analysis of both of the datasets, they were combined to make the dataframes that will be used in model training and evaluation. These relationships were also examined using plotly in R.  
+  
+Four functions were used to calculate and evaluate the model metrics. Residual QQ plots, error distributions, and feature importance heatmaps were visualized for each model. Five different predictive models (linear regression, random forest, support vector machine, gradient boosting, and elastic net models) were developed to include meteorological factors and predict seasonal influenza activity. Coefficient of determination (R2), root mean squared error (RMSE), mean absolute error (MAE), mean squared error (MSE), mean absolute percentage error (MAPE), and the correlation between the prediction and the test target were used to evaluate the models' performance. Additionally, learning curves of each model were used to determine optimal parameters. Percent positive was used as the variable to predict, as it takes into account the differences in population growth.   
+  
+Before models' creation began, the correlations of the variables in question were examined to ensure that the models accurately reflected and predicted the data. Both Pearson and Spearman correlations were utilized to look at both linear and rank-order relationships. The two correlations helped inform the partitions used to split the training and testing sets so that both sets had approximately the same initial correlation between the two variables.  
+  
+After these models were evaluated for their prediction accuracy and were validated for their use in this domain, future data was synthetically generated using a linear regression model given the trends in meteorological data. This future data was then used to predict the incidence of influenza for the years 2025 - 2050. Future predictions on temperature and percent positive rates will be made using the top performers from the previous analysis. These will then be evaluated to determine if the predictive accuracy extends beyond one year. 
+  
+Using these statistical techniques, we will be able to draw conclusions about the relationships between meteorological data and influenza incidence, validating the use of predictive modeling in this domain and informing future public health policy implementations.   
+
+
+## Datasets
+There were 5 primary data sets used in this analysis across two domains of information, meteorological data and influenza incidence rates. 
+
+### Meteorological Data
+The meteorological data was collected from the National Center for Environmental Information National Oceanic Atmospheric Administration (National Centers for Environmental Information & National Oceanic and Atmospheric Administration, 2024). Three datasets were used here: *climate codes*, *climate data maximum*, and *climate data minimum*.  
+  
+1. "Climate codes" describes the record format for the state and national files.  
+  
+2. "Climate data maximum" gives the maximum temperature in Fahrenheit for each month of the year for years 1895 - 2024.   
+  
+3. "Climate data minimum" gives the minimum temperature in Fahrenheit for each month of the year for years 1895 - 2024.    
+
+These dataframes were joined and cleaned to remove NAN values and were parsed together using the climate code data set to ensure that state names and codes were assigned correctly. 
+
+
+### Influenza Data 
+Influenza incidence data was collected from the World Health Organization and CDC National Respiratory and Enteric Virus Surveillance System (World Health Organization et al., 2024). Two main datasets from this repository were used: *WHO_NREVSS_Clinical_Labs* and *WHO_NREVSS_Combined_prior_to_2015_16*.    
+  
+4. "WHO_NREVSS_Clinical_Labs" contained weekly data from the years 2015 - 2024 about the total incidence from influenza tests that were sent in for verification and the percent of the population that tested positive for influenza.   
+  
+5. "WHO_NREVSS_Combined_prior_to_2015_16" contained weekly data from the years 1997 - 2014 about the total incidence from influenza tests that were sent in for verification and the percent of the population that tested positive for influenza.    
+  
+It is important to note these datasets only reported the positive influenza tests that were *reported*, potentially excluding flu counts that were not reported. 
+For this analysis, both datasets contained incidence rates of Influenza A and Influenza B, however, only the total specimen count and total percent positive were used to analyze the whole picture of influenza infection rates. 
+
+# Results
+```{r set up}
+# Load Packages
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(readr)
+  library(stringr)
+  library(dplyr)
+  library(tidyr)
+  library(plotly)
+  library(viridis)
+  library(caret)
+  library(randomForest)
+  library(gbm)
+  library(e1071)
+  library(Metrics)
+  library(forecast)
+  library(glmnet)
+  library(viridis)
+  library(corrplot)
+  library(pdp)
+  library(MLmetrics)
+  library(pROC)
+  library(car)
+  library(xgboost)
+  library(lubridate)
+  library(janitor)
+})
+
+# preferred color palette
+colors1 = c('#7AD151FF')
+colors2 = c('#440154FF', '#7AD151FF')
+colors3 = c('#440154FF', '#22A884FF', '#FDE725FF')
+colors4 = c('#440154FF', '#22A884FF', '#7AD151FF', '#FDE725FF')
+colors4 = c('#440154FF', '#22A884FF', '#7AD151FF', '#FDE725FF')
+colors5 = c('#440154FF', '#33638DFF', '#22A884FF', '#7AD151FF', '#FDE725FF')
+```
+
+
+## Data Preparation
+### Climate Data
+Both dataframes with the climate maximums and minimums were read in and cleaned of NAN values. Then, only national values were used and the averages for each month were found. This makes the climate data more comparable to the influenza data. 
+```{r climate data}
+
+# Load in data
+column_classes <- c("character", rep("numeric", 12))
+
+monthly_maximum <- read.table("climate_data/climate_data_maximum.txt", header = FALSE, stringsAsFactors = FALSE, colClasses = column_classes)
+monthly_minimum <- read.table("climate_data/climate_data_minimum.txt", header = FALSE, stringsAsFactors = FALSE, colClasses = column_classes)
+
+# Rename columns
+colnames(monthly_maximum) <- c("code", "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december")
+colnames(monthly_minimum) <- c("code", "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december")
+
+# nan conversion
+replace_with_na <- function(value) {
+  if(value %in% c('-7777', '-8888', '-9999', '-99.9')) {
+    return(NA)
+  } else {
+    return(value)
+  }
+}
+monthly_maximum[,-1] <- sapply(monthly_maximum[,-1], function(column) sapply(column, replace_with_na))
+monthly_minimum[,-1] <- sapply(monthly_minimum[,-1], function(column) sapply(column, replace_with_na))
+
+# Parse state codes
+state_codes_names <- c(
+  "001" = "Alabama", "002" = "Arizona", "003" = "Arkansas", "004" = "California", 
+  "005" = "Colorado", "006" = "Connecticut", "007" = "Delaware", "008" = "Florida", 
+  "009" = "Georgia", "010" = "Idaho", "011" = "Illinois", "012" = "Indiana", 
+  "013" = "Iowa", "014" = "Kansas", "015" = "Kentucky", "016" = "Louisiana", 
+  "017" = "Maine", "018" = "Maryland", "019" = "Massachusetts", "020" = "Michigan", 
+  "021" = "Minnesota", "022" = "Mississippi", "023" = "Missouri", "024" = "Montana", 
+  "025" = "Nebraska", "026" = "Nevada", "027" = "New Hampshire", "028" = "New Jersey", 
+  "029" = "New Mexico", "030" = "New York", "031" = "North Carolina", "032" = "North Dakota", 
+  "033" = "Ohio", "034" = "Oklahoma", "035" = "Oregon", "036" = "Pennsylvania", 
+  "037" = "Rhode Island", "038" = "South Carolina", "039" = "South Dakota", 
+  "040" = "Tennessee", "041" = "Texas", "042" = "Utah", "043" = "Vermont", 
+  "044" = "Virginia", "045" = "Washington", "046" = "West Virginia", "047" = "Wisconsin", 
+  "048" = "Wyoming", "050" = "Alaska", "101" = "Northeast Region", 
+  "102" = "East North Central Region", "103" = "Central Region", 
+  "104" = "Southeast Region", "105" = "West North Central Region", 
+  "106" = "South Region", "107" = "Southwest Region", "108" = "Northwest Region", 
+  "109" = "West Region", "110" = "National (contiguous 48 States)"
+)
+parse_code <- function(code) {
+  state_code <- str_pad(str_sub(code, start = 1, end = 3), width = 3, pad = "0")
+  division_number <- str_sub(code, start = 4, end = 4)
+  element_code <- str_sub(code, start = 5, end = 6)
+  year_of_record <- str_sub(code, start = 7, end = 10)
+  return(data.frame(state_code, division_number, element_code, year_of_record))
+}
+
+parsed_data <- lapply(monthly_maximum$code, parse_code)
+parsed_data <- dplyr::bind_rows(parsed_data)
+parsed_data <- parsed_data %>%
+  mutate(state_name = state_codes_names[state_code]) %>%
+  mutate(element_code = case_when(
+    element_code == "27" ~ "max",
+    element_code == "28" ~ "min",
+    TRUE ~ element_code
+  ))
+month_max <- cbind(parsed_data, monthly_maximum)
+
+parsed_data <- lapply(monthly_minimum$code, parse_code)
+parsed_data <- dplyr::bind_rows(parsed_data)
+parsed_data <- parsed_data %>%
+  mutate(state_name = state_codes_names[state_code]) %>%
+  mutate(element_code = case_when(
+    element_code == "27" ~ "max",
+    element_code == "28" ~ "min",
+    TRUE ~ element_code
+  ))
+month_min <- cbind(parsed_data, monthly_minimum)
+
+final_data <- bind_rows(month_max, month_min)
+climate_data <- final_data %>%
+  select(state_code, state_name, element_code, year_of_record, january:december)
+
+# Calculate the averages for use in analysis
+merged_df <- full_join(month_min, month_max, 
+                       by = c("state_code", "year_of_record", "state_name"),
+                       suffix = c("_min", "_max"))
+merged_df <- merged_df %>%
+  mutate(january_avg = (january_min + january_max) / 2,
+         february_avg = (february_min + february_max) / 2,
+         march_avg = (march_min + march_max) / 2,
+         april_avg = (april_min + april_max) / 2,
+         may_avg = (may_min + may_max) / 2,
+         june_avg = (june_min + june_max) / 2,
+         july_avg = (july_min + july_max) / 2,
+         august_avg = (august_min + august_max) / 2,
+         september_avg = (september_min + september_max) / 2,
+         october_avg = (october_min + october_max) / 2,
+         november_avg = (november_min + november_max) / 2,
+         december_avg = (december_min + december_max) / 2)
+average_df <- merged_df %>%
+  select(state_code, state_name, year_of_record,
+         january_avg, february_avg, march_avg, april_avg, 
+         may_avg, june_avg, july_avg, august_avg, 
+         september_avg, october_avg, november_avg, december_avg)
+average_df$year_of_record <- as.factor(average_df$year_of_record)
+average_df <- average_df %>%
+  mutate(state_name = ifelse(state_name == "National (contiguous 48 States)", "National", state_name))
+national_average <- subset(average_df, state_name == "National")
+# head(national_average)
+```
+
+
+### Flu Data
+Both flu datasets were read in and cleaned. Weeks were parsed into months and assigned to align with the climate data. Both total incidence and percent positive were included in this dataset for analysis, but percent positive is the primary variable used. 
+```{r flu data}
+# Load in data
+flu1 <- read_csv("flu_data/WHO_NREVSS_Combined_prior_to_2015_16.csv", skip = 1, col_types = cols(.default = "c"))
+flu2 <- read_csv("flu_data/WHO_NREVSS_Clinical_Labs.csv", skip = 1, col_types = cols(.default = "c"))
+combined_flu <- bind_rows(flu1, flu2)
+flu_data <- combined_flu %>%
+  select(`REGION TYPE`, YEAR, WEEK, `TOTAL SPECIMENS`, `PERCENT POSITIVE`)
+flu_data <- flu_data %>%
+    rename(
+        state_name = `REGION TYPE`,
+        year_of_record = YEAR,
+        week = WEEK,
+        total_incidence = `TOTAL SPECIMENS`,
+        percent_positive = `PERCENT POSITIVE`
+    )
+flu_data <- flu_data %>%
+    mutate(
+        week = as.numeric(week),
+        total_incidence = as.numeric(total_incidence),
+        year_of_record = as.factor(year_of_record),
+        percent_positive = as.numeric(percent_positive)
+    )
+
+
+# Parse weekly codes
+assign_month_and_weeks <- function(week) {
+  if (week < 1 || week > 53) {
+    stop("Week number should be between 1 and 53")
+  }
+  month_ranges <- list(
+    january = c(1, 4),
+    february = c(5, 8),
+    march = c(9, 12),
+    april = c(13, 16),
+    may = c(17, 21),
+    june = c(22, 25),
+    july = c(26, 29),
+    august = c(30, 33),
+    september = c(34, 38),
+    october = c(39, 43),
+    november = c(44, 48),
+    december = c(49, 53)
+  )
+  month <- NA
+  week_range <- NA
+  for (m in names(month_ranges)) {
+    range <- month_ranges[[m]]
+    if (week >= range[1] && week <= range[2]) {
+      month <- m
+      week_range <- paste(range[1], "-", range[2], sep = "")
+      break
+    }
+  }
+  return(list(month = month, week_range = week_range))
+}
+month_and_weeks <- sapply(flu_data$week, function(x) assign_month_and_weeks(x))
+flu_data$month <- unlist(month_and_weeks[1, ])
+flu_data$weeks <- unlist(month_and_weeks[2, ])
+flu_data$month <- factor(flu_data$month, levels = c("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"))
+flu_monthly <- flu_data %>%
+  group_by(state_name, year_of_record, month, weeks) %>%
+  summarise(
+    total_incidence = sum(total_incidence, na.rm = TRUE),
+    percent_positive = mean(percent_positive, na.rm = TRUE),
+    .groups = 'drop'
+  )
+```
+
+## Data Visualization
+Examining the variables from the onset can shed some light on the patterns of both influenza rates and seasonal temperatures. Topics of interest to explore include seasonal patterns related to both variables, overall trends in the past ~20 years, and visual depictions that can help us determine the changes that have occurred over time. 
+```{r inital data visualization}
+# Climate visualizations
+long_format_df <- average_df %>%
+  filter(state_name == "National") %>%
+  pivot_longer(
+    cols = starts_with("january_avg"):starts_with("december_avg"),
+    names_to = "month",
+    values_to = "temperature"
+  )
+long_format_df$month <- gsub("_avg", "", long_format_df$month)
+long_format_df$month <- factor(long_format_df$month, levels = c("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"))
+suppressWarnings({
+  p_temp <- plot_ly(
+    long_format_df,
+    x = ~month,
+    y = ~temperature,
+    type = 'scatter',
+    mode = 'lines+markers',
+    color = ~year_of_record,
+    colors = viridis(130),
+    text = ~paste("Year: ", year_of_record, "<br>Temperature: ", temperature),
+    hoverinfo = 'text'
+  ) %>%
+    layout(
+      title = "Monthly Temperatures for US Per Year",
+      xaxis = list(title = "Month", tickangle = -45),
+      yaxis = list(title = "Temperature (°F)"),
+      legend = list(title = list(text = "Year"))
+  )
+})
+
+yearly_climate_average <- national_average %>%
+  group_by(state_name, year_of_record) %>%
+  summarize(yearly_avg = mean(c_across(starts_with(c("january_avg", "february_avg", "march_avg", "april_avg", "may_avg", "june_avg", "july_avg", "august_avg","september_avg", "october_avg", "november_avg", "december_avg"))), na.rm = TRUE), .groups = 'drop')
+climate_stripes_plot <- plot_ly(
+   data = yearly_climate_average,
+   x = ~year_of_record,
+   y = ~1,
+   type = 'bar',
+   color = ~yearly_avg,
+   colors = viridis(256),
+   hoverinfo = 'text',
+   text = ~paste("Year: ", year_of_record, "<br>Avg Temp: ", round(yearly_avg, 2))
+) 
+climate_stripes_plot <- climate_stripes_plot %>%
+  add_segments(x = 1930, xend = 1930, y = -0.05, yend = 1.05, 
+               line = list(color = "red", dash = "dot"), 
+               hoverinfo = 'text', text = "1930: Dust Bowl") %>%
+  add_segments(x = 1998, xend = 1998, y = -0.05, yend = 1.05, 
+               line = list(color = "red", dash = "dot"), 
+               hoverinfo = 'text', text = "1998: Super El Niño") %>%
+  layout(
+    title = "Figure 3: Yearly Climate Stripes",
+    xaxis = list(title = "Year of Record", tickangle = -45, range = c(1895, 2024)),  
+    yaxis = list(showticklabels = FALSE, title = ""),
+    showlegend = FALSE
+  )
+
+
+# Flu visualizations
+flu_monthly$year_of_record <- as.factor(flu_monthly$year_of_record)
+p_flu <- plot_ly(
+  data = flu_monthly,
+  x = ~month,
+  y = ~total_incidence,
+  color = ~year_of_record,
+  colors = viridis(length(unique(flu_monthly$year_of_record))),
+  type = 'scatter',
+  mode = 'lines+markers'
+) %>%
+  layout(
+    title = "Monthly Flu Incidence Per Year",
+    xaxis = list(title = "Month", tickangle = -45),
+    yaxis = list(title = "Total Flu Incidence"),
+    legend = list(title = list(text = "Year"))
+  )
+
+flu_data$year_of_record <- as.numeric(as.character(flu_data$year_of_record))
+yearly_flu_avg <- flu_data %>%
+  group_by(state_name, year_of_record) %>%
+  summarize(yearly_avg_incidence = mean(total_incidence, na.rm = TRUE), .groups = 'drop')
+flu_stripes_plot <- plot_ly(
+  data = yearly_flu_avg, 
+  x = ~year_of_record, 
+  y = ~1, 
+  type = 'bar', 
+  color = ~yearly_avg_incidence, 
+  colors = colors5, 
+  hoverinfo = 'text', 
+  text = ~paste("Year: ", year_of_record, "<br>Avg Incidence: ", round(yearly_avg_incidence, 2))
+)
+flu_stripes_plot <- flu_stripes_plot %>%
+  add_segments(x = 2009, xend = 2009, y = -0.05, yend = 1.05, 
+               line = list(color = "red", dash = "dot"), 
+               hoverinfo = 'text', text = "2009: H1N1 Pandemic") %>%
+  add_segments(x = 2020, xend = 2020, y = -0.05, yend = 1.05, 
+               line = list(color = "red", dash = "dot"), 
+               hoverinfo = 'text', text = "2020: COVID-19 Pandemic") %>%
+  layout(
+    title = "Figure 4: Yearly Flu Stripes",
+    xaxis = list(title = "Year of Record", tickangle = -45),  # Tilt the x-axis labels by 45 degrees
+    yaxis = list(showticklabels = FALSE, title = ""),
+    showlegend = FALSE
+  )
+
+# Combined monthly trends
+monthly_plot_combined <- subplot(
+  p_temp, p_flu,
+  nrows = 2,
+  titleX = TRUE,
+  titleY = TRUE, 
+  heights = c(0.5, 0.5)
+) %>%
+  layout(
+    title = "Figure 1: Flu Incidence and Temperature Trends",
+    showlegend = TRUE,
+    xaxis = list(showticklabels=FALSE, title=""), 
+    xaxis2 = list(tickangle = -45, title = "Month")
+  )
+
+
+# Trend lines
+normalize <- function(x) {
+  return ((x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
+}
+yearly_flu_avg$normalized_flu <- normalize(yearly_flu_avg$yearly_avg_incidence)
+yearly_climate_average$normalized_temp <- normalize(yearly_climate_average$yearly_avg)
+yearly_climate_average$year_of_record <- as.numeric(as.character(yearly_climate_average$year_of_record))
+yearly_flu_avg <- yearly_flu_avg %>%
+  filter(year_of_record >= 1997 & year_of_record <= 2024)
+yearly_climate_average <- yearly_climate_average %>%
+  filter(year_of_record >= 1997 & year_of_record <= 2024)
+flu_trend <- lm(normalized_flu ~ year_of_record, data = yearly_flu_avg)
+temp_trend <- lm(normalized_temp ~ year_of_record, data = yearly_climate_average)
+yearly_flu_avg$flu_trend <- predict(flu_trend, yearly_flu_avg)
+yearly_climate_average$temp_trend <- predict(temp_trend, yearly_climate_average)
+trend1 <- plot_ly() %>%
+  add_lines(data = yearly_flu_avg, 
+            x = ~year_of_record, 
+            y = ~normalized_flu, 
+            name = 'Normalized Flu Incidence',
+            line = list(color = colors2[1])) %>%
+  add_lines(data = yearly_flu_avg,
+            x = ~year_of_record,
+            y = ~flu_trend,
+            name = 'Flu Incidence Trend',
+            line = list(color = colors2[1], dash = 'dash')) %>%
+  add_lines(data = yearly_climate_average, 
+            x = ~year_of_record, 
+            y = ~normalized_temp, 
+            name = 'Normalized Avg Temperature',
+            line = list(color = colors2[2])) %>%
+  add_lines(data = yearly_climate_average,
+            x = ~year_of_record,
+            y = ~temp_trend,
+            name = 'Temperature Trend',
+            line = list(color = colors2[2], dash = 'dash')) %>%
+  layout(
+    title = 'Figure 2: Normalized Yearly Flu Incidence and Temperature Averages',
+    xaxis = list(title = 'Year of Record'),
+    yaxis = list(title = 'Normalized Value (0-1)'),
+    legend = list(orientation = 'h', x = 0.3, y = -0.2)
+  )
+```
+
+
+
+```{r display fig1, echo=TRUE, include=TRUE}
+monthly_plot_combined
+```
+**Figure 1:** Climate and influenza data per year from 1895 - 2024. Due to data restrictions, influenza data is unavailable before 1997.   
+
+By examining the seasonal trends, we can see that temperature (unsurprisingly) increases during the summer months of June, July, and August and decreases during the winter months of January, February, November, and December. Total influenza incidence has significantly increased in recent years. Temperature trends also show increases in averages across all months. 
+
+```{r display fig2, echo=TRUE, include=TRUE}
+trend1
+```
+**Figure 2:** Normalized climate and influenza trends from 1997 - present with trend lines denoted with dashed lines.  
+
+Both influenza and temperature trends from the past 20 years have increased.
+
+```{r display fig3, echo=TRUE, include=TRUE}
+climate_stripes_plot
+```
+**Figure 3:** Climate stripes from 1895 - 2024 with color representing the average temperature in that year. Red lines denote major climactic events that have happened: the 1930 Dust Bowl and the 1998 Super El Niño. This data visualizes that over the past ~100 years, average yearly temperatures have significantly increased.   
+
+```{r display fig4, echo=TRUE, include=TRUE}
+flu_stripes_plot
+```
+**Figure 4:** Influenza stripes from 1997 - 2024 with color representing the average flu incidence in that year. Red lines denote major epidemics with H1N1 in 2009 and COVID-19 in 2020. Over the past ~100 years, average flu incidences have significantly increased.  
+
+  
+
+## Combined Flu and Climate Data for Analysis
+```{r combined data}
+# Stage 1 - Yearly data
+set.seed(1998)
+yearly_flu_total <- flu_data %>%
+  group_by(state_name, year_of_record) %>%
+  summarize(yearly_total_incidence = sum(total_incidence, na.rm = TRUE), 
+            yearly_percent_positive = mean(percent_positive, na.rm = TRUE), 
+            .groups = 'drop'
+  )
+combined_data <- yearly_climate_average %>%
+  left_join(yearly_flu_total, by = c("year_of_record")) %>%
+  select(year_of_record, yearly_avg, yearly_total_incidence, yearly_percent_positive)
+combined_data$year_of_record <- as.numeric(as.character(combined_data$year_of_record))
+combined_data$yearly_avg <- as.numeric(combined_data$yearly_avg)
+combined_data$yearly_total_incidence <- as.numeric(combined_data$yearly_total_incidence)
+combined_data <- na.omit(combined_data)
+
+
+# Stage 2 - Monthly Data
+set.seed(11302024)
+temp_data <- national_average %>%
+  pivot_longer(
+    cols = ends_with("_avg"),
+    names_to = "month",
+    values_to = "average_temp"
+  ) %>%
+  mutate(
+    month = gsub("_avg", "", month),
+    month = tolower(month)
+  )
+combined_data2 <- flu_monthly %>%
+  left_join(temp_data, by = c("state_name" = "state_name", "year_of_record" = "year_of_record", "month" = "month"))
+combined_data2 <- combined_data2 %>%
+  mutate(year_of_record = as.numeric(as.character(year_of_record)))
+combined_data2 <- combined_data2 %>%
+  filter(year_of_record >= 1997 & year_of_record <= 2024)
+combined_data2 <- combined_data2 %>%
+  na.omit()
+combined_data2 <- combined_data2 %>%
+  select(year_of_record, month, total_incidence, average_temp, percent_positive)
+combined_data2 <- combined_data2 %>%
+  mutate(
+    year_of_record = as.factor(year_of_record),
+    month = as.factor(month)
+  )
+# head(combined_data2)
+```
+
+ 
+```{r display combined data, echo=TRUE, include=TRUE}
+head(combined_data)
+```
+The first dataset that will be used is the combined dataset with the yearly averages.
+
+```{r display combined data2, echo=TRUE, include=TRUE}
+head(combined_data2)
+```
+The second dataset that will be used is the combined dataset with the monthly averages.  
+
+```{r combined visual}
+combined_vis1 <- plot_ly(combined_data, x = ~year_of_record, y = ~yearly_percent_positive, z = ~yearly_avg, type = 'scatter3d', mode = 'markers', colors = colors5, color = ~year_of_record) %>%
+  layout(
+    title = 'Figure 5: Yearly Climate & Influenza Relationships',
+    scene = list(
+      xaxis = list(title = 'Year'),
+      yaxis = list(title = 'Avg Percent Positive'),
+      zaxis = list(title = 'Avg Yearly Temperature')
+    )
+  )
+
+months_ordered <- factor(combined_data2$month, 
+                         levels = c("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"))
+viridis_colors <- viridis_pal(option = "D")(length(levels(months_ordered)))
+month_colors <- setNames(viridis_colors, levels(months_ordered))
+combined_vis2 <- plot_ly(combined_data2, x = ~year_of_record, y = ~percent_positive, z = ~average_temp, type = 'scatter3d', mode = 'markers', colors = month_colors, color = ~month) %>%
+  layout(
+    title = 'Figure 6: Monthly Climate & Influenza Relationships',
+    scene = list(
+      xaxis = list(title = 'Year'),
+      yaxis = list(title = 'Percent Positive'),
+      zaxis = list(title = 'Avg Monthly Temperature')
+    )
+  )
+
+combined_vis1
+combined_vis2
+```
+
+
+```{r display fig5, echo=TRUE, include=TRUE}
+combined_vis1
+```
+**Figure 5:** Yearly relationships between average temperature and average percent of the population positive for influenza. Color denotes the year of record.   
+  
+```{r display fig6, echo=TRUE, include=TRUE}
+combined_vis2
+```
+**Figure 6:** Monthly relationships between average temperature and average percent of the population positive for influenza each year. Color denotes the month.   
+  
+The monthly data shows us significantly more rich analysis. Looking at 2009 in both the yearly and monthly data, it is a significant outlier due to the H1N1 pandemic (a type of Influenza A). Pandemics like this can inform possible temporal relationships, showing that pandemics like this are rare, but influential.  
+
+## Functions
+Numerous functions were used to develop and analyze the models.  
+  
+1. The "Metric Function" calculates the RMSE, MAE, R2, MSE, MAPE, and Correlation between the predictions and the test target (percent positive -> average temperature).  
+  
+2. The "Residual QQ Plot Function" plots the residuals of the model it is given.     
+3. The "Error Distribution Heatmap" function plots the error distribution heat map of the model it is given.  
+  
+4. The "Feature Importance Heatmap" function plots a heatmap of the important features to the model's performance.   
+
+These functions are used on every model to analyze their performance. Not all graphs are shown and included in the final analysis.  
+```{r functions}
+set.seed(1998)
+
+# Metrics
+calculate_and_print_metrics <- function(model, test_data, test_target) {
+  prediction <- tryCatch({
+    predict(model, test_data)
+  }, error = function(e) {
+    warning(paste("Prediction error for model:", e))
+    return(rep(NA, length(test_target)))
+  })
+  prediction <- as.numeric(as.character(prediction))
+  test_target <- as.numeric(as.character(test_target))
+  rmse <- RMSE(prediction, test_target)
+  mae <- MAE(prediction, test_target)
+  r_squared <- R2(prediction, test_target)
+  mse <- mse(test_target, prediction)
+  mape <- mape(test_target, prediction)
+  correlation <- cor(prediction, test_target, use = "complete.obs")
+  metrics <- list(
+    RMSE = rmse,
+    MAE = mae,
+    R2 = r_squared,
+    MSE = mse,
+    MAPE = mape,
+    Correlation = correlation,
+    Predictions = prediction 
+  )
+  result <- list(
+    metrics = metrics, 
+    predictions = prediction
+  )
+  return(result)
+}
+print_metrics <- function(metrics, model_name) {
+  cat(model_name, "Performance Metrics:\n\n",
+      "Root Mean Squared Error (RMSE):", metrics$metrics$RMSE, "\n",
+      "Mean Absolute Error (MAE):", metrics$metrics$MAE, "\n",
+      "R-squared:", metrics$metrics$R2, "\n",
+      "Mean Squared Error (MSE):", metrics$metrics$MSE, "\n",
+      "Mean Absolute Percentage Error (MAPE):", metrics$metrics$MAPE, "\n", 
+      "Correlation:", metrics$metrics$Correlation, "\n")
+}
+
+
+# Residual QQ Plot Function
+qq_plot_residuals <- function(model, test_data, response_var) {
+  predictions <- tryCatch(
+    predict(model, test_data),
+    error = function(e) {
+      stop("Error in generating predictions: ", e$message)
+    }
+  )
+    if (is.null(test_data[[response_var]])) {
+    stop("The response variable column is missing in the test data.")
+  }
+  residuals <- test_data[[response_var]] - predictions
+  if (all(is.na(residuals))) {
+    stop("All residuals are NA, cannot generate QQ plot.")
+  }
+  residuals_standardized <- (residuals - mean(residuals, na.rm = TRUE)) / sd(residuals, na.rm = TRUE)
+  if (length(residuals_standardized) == 0 || all(is.na(residuals_standardized))) {
+    stop("Standardized residuals are empty or all NA.")
+  }
+  theoretical_quantiles <- qqnorm(residuals_standardized, plot.it = FALSE)$x
+  df_qq <- data.frame(
+    Theoretical = theoretical_quantiles,
+    Sample = residuals_standardized
+  ) %>% na.omit()
+  qq_plot <- plot_ly(df_qq, x = ~Theoretical, y = ~Sample, type = 'scatter', mode = 'markers', marker = list(color = colors2[1])) %>%
+    add_trace(x = ~Theoretical, y = ~Theoretical, mode = 'lines', line = list(color = colors2[2], dash = 'dash')) %>%
+    layout(
+      title = paste("Q-Q Plot of Residuals"),
+      xaxis = list(title = "Theoretical Quantiles"),
+      yaxis = list(title = "Sample Quantiles"),
+      showlegend = FALSE
+    )
+  return(qq_plot)
+}
+
+# Error Distribution Heatmap
+error_distribution_heatmap <- function(model, test_data, response_var) {
+  predictions <- predict(model, test_data)
+  residuals <- test_data[[response_var]] - predictions
+  heatmap_data <- data.frame(
+    Actual = test_data[[response_var]],
+    Predicted = predictions,
+    Residuals = residuals
+  )
+  heatmap_err_dist <- ggplot(heatmap_data, aes(Actual, Predicted)) +
+    geom_tile(aes(fill = Residuals)) + 
+    scale_fill_gradient2(low = colors3[1], high = colors3[2], mid = colors3[3], midpoint = 0) + 
+    labs(title = "Error Distribution Heat Map", x = "Actual Values", y = "Predicted Values") +
+    theme_minimal()
+  return(ggplotly(heatmap_err_dist))
+}
+
+# Feature Importance Heatmap
+feature_importance_heatmap <- function(model) {
+  importance <- varImp(model, scale = FALSE)
+  importance_df <- as.data.frame(importance$importance)
+  importance_df$Variable <- rownames(importance_df)
+  importance_df <- importance_df %>%
+    gather(key = "Metric", value = "Value", -Variable)
+  importance_df <- importance_df %>% filter(!is.na(Value))
+  if (nrow(importance_df) == 0) {
+    stop("No importance values to plot.")
+  }
+  heatmap_feature_imp <- plot_ly(
+    data = importance_df, x = ~Variable, y = ~Metric, z = ~Value, type = "heatmap", colors = colorRamp(colors5)
+  ) %>%
+    layout(title = "Feature Importance Heat Map",
+           xaxis = list(title = "Feature"),
+           yaxis = list(title = "Importance Metric"))
+  return(heatmap_feature_imp)
+}
+```
+
+## Yearly Examination
+First, as mentioned in methods, the aggregated yearly data will be examined and models will be trained on the yearly data. 
+
+### Correlations
+First, it is important to look at the correlations between the percent of the population that tests positive for influenza and the average yearly temperature. 
+```{r correlation yearly original, echo=TRUE, include=TRUE}
+# Total Incidence 
+correlation_pearson_ti <- cor(combined_data$yearly_total_incidence, combined_data$yearly_avg, use = "complete.obs", method = "pearson")
+correlation_spearman_ti <- cor(combined_data$yearly_total_incidence, combined_data$yearly_avg, use = "pairwise.complete.obs", method = "spearman")
+cat("Total Incidence Correlation:\nPearson correlation: ", correlation_pearson_ti, "\nSpearman correlation: ", correlation_spearman_ti, "\n")
+
+# Percent Positive
+correlation_pearson_pp <- cor(combined_data$yearly_percent_positive, combined_data$yearly_avg, use = "complete.obs", method = "pearson")
+correlation_spearman_pp <- cor(combined_data$yearly_percent_positive, combined_data$yearly_avg, use = "pairwise.complete.obs", method = "spearman")
+cat("\nPercent Positive Correlation:\nPearson correlation: ", correlation_pearson_pp, "\nSpearman correlation: ", correlation_spearman_pp)
+```
+The preliminary correlation analysis shows interesting data. The total incidence shows a moderate positive relationship with respect to both linear (pearson) and rank - order relationships (spearman). However, the percent positive show a weak negative relationship with respect to both linear and rank-order relationships. The Pearson correlation tends to be higher when the relationship is more linear, and the Spearman correlation tends to be higher when ranking order is considered, irrespective of the relationship. In the yearly data, this relationship is not particularly strong. 
+
+### Yearly Model Training and Evaluation
+First, the training and testing data are evaluated against each other to see if their correlations between the two variables in question (yearly_percent_positive and yearly_avg) are relatively close. This tells us whether or not the testing data is similar to the training data, and gives us an idea if of the models' performance. 
+
+```{r yearly setup}
+set.seed(1998)
+
+# Split into train and test data
+trainIndex <- createDataPartition(combined_data$yearly_percent_positive, p = 0.8, list = FALSE, times = 1)
+train_data <- combined_data[trainIndex,]
+test_data <- combined_data[-trainIndex,]
+
+# Evaluate how close the training and testing dataset are 
+calculate_correlation <- function(data, temp_col, incidence_col, data_name) {
+  correlation <- cor(data[[temp_col]], data[[incidence_col]], use = "complete.obs")  # Ensures missing values are ignored
+  summary_list <- list(
+    "Dataset" = data_name,
+    "TempCol" = temp_col,
+    "IncidenceCol" = incidence_col,
+    "Correlation" = correlation
+  )
+  cat("Dataset:", data_name, "\nCorrelation between", temp_col, "and", incidence_col, ":\nCorrelation:", round(correlation, 4), "\n\n")
+  return(summary_list)
+}
+correlation_result_yearly1 <- calculate_correlation(test_data, "yearly_avg", "yearly_percent_positive", "Test Data 1")
+correlation_result_yearly2 <- calculate_correlation(train_data, "yearly_avg", "yearly_percent_positive", "Training Data 1")
+
+
+numeric_columns <- sapply(combined_data, is.numeric)
+data_numeric <- combined_data[, numeric_columns]
+cor_matrix <- cor(data_numeric, use = "pairwise.complete.obs")
+heatmap_cor <- plot_ly(
+  x = colnames(cor_matrix),
+  y = colnames(cor_matrix),
+  z = cor_matrix,
+  type = "heatmap",
+  colors = colorRamp(c(colors5))
+) %>%
+  layout(
+    title = "Figure 7: Combined Data Feature Correlation Matrix Heat Map",
+    xaxis = list(title = ""),
+    yaxis = list(title = "")
+  )
+
+heatmap_cor
+```
+
+
+```{r display fig7, echo=TRUE, include=TRUE}
+correlation_result_yearly1 <- calculate_correlation(test_data, "yearly_avg", "yearly_percent_positive", "Test Data 1")
+correlation_result_yearly2 <- calculate_correlation(train_data, "yearly_avg", "yearly_percent_positive", "Training Data 1")
+
+heatmap_cor
+```
+**Figure 7:** Heatmap of the correlations in the dataframe 'combined_data'. The correlation between the yearly average temperature and the average yearly percent of the population positive for influenza is -0.23 whereas the correlation between the yearly average temperature and the yearly total incidence of influenza is 0.40.  
+  
+
+
+Using a partition of 0.8, meaning that 80% of the data is used for training and 20% is used for testing, the correlation for the testing data is approximately -0.78 while the correlation for the training data is -0.20. 
+
+Using a partition of 0.4, meaning that 40% of the data is used for training and 60% is used for testing, the correlation for the testing data is approximately -0.408 while the correlation for the training data is -0.15. 
+
+Comparing the correlation between percent_positive and yearly_avg (-0.23) with the training and testing splits, the best option is a partition of 0.8, in order to give the model the optimal chance to make accurate predictions.
+
+```{r yearly models}
+# Linear Regression Model 
+train_data$year_of_record <- as.factor(train_data$year_of_record)
+test_data$year_of_record <- as.factor(test_data$year_of_record)
+set.seed(11302024)
+lm_model <- train(yearly_percent_positive ~ yearly_avg,
+                  data = train_data, 
+                  method = "lm",
+                  trControl = trainControl(method = "cv", number = 5, savePredictions = "final"),
+  metric = "RMSE")
+lm_metrics <- calculate_and_print_metrics(lm_model, test_data, test_data$yearly_percent_positive)
+lm_vals <- print_metrics(lm_metrics, "Linear Model")
+lm_pred <- lm_metrics$predictions
+lm_summary <- summary(lm_model$finalModel)
+lmy_qq_plot <- qq_plot_residuals(lm_model, test_data, 'yearly_percent_positive')
+lmy_err_heatmap <- error_distribution_heatmap(lm_model, test_data, 'yearly_percent_positive')
+# lm_summary
+# lmy_qq_plot
+# lmy_err_heatmap
+
+
+# Random Forest 
+rf_model <- train(yearly_percent_positive ~ yearly_avg, 
+                  data = train_data, 
+                  method = "rf", 
+                  trControl = trainControl(method = "cv", number = 5),
+                  tuneGrid = data.frame(mtry = 1), metric = "RMSE")
+rf_metrics <- calculate_and_print_metrics(rf_model, test_data, test_data$yearly_percent_positive)
+rf_vals <- print_metrics(rf_metrics, "Random Forest Model")
+rf_pred <- rf_metrics$predictions
+residuals <- test_data$yearly_percent_positive - rf_pred
+rf_importance <- varImp(rf_model, scale = FALSE)
+rfy_qq_plot <- qq_plot_residuals(rf_model, test_data, 'yearly_percent_positive')
+rfy_err_heatmap <- error_distribution_heatmap(rf_model, test_data, 'yearly_percent_positive')
+rfy_importance_heatmap <- feature_importance_heatmap(rf_model)
+# rf_importance
+# rfy_qq_plot
+# rfy_err_heatmap
+# rfy_importance_heatmap
+
+
+# Support Vector Matrix
+svm_model <- train(yearly_percent_positive ~ yearly_avg, 
+                   data = train_data, 
+                   method = "svmRadial", 
+                   trControl = trainControl(method = "cv", number = 5), metric = "RMSE")
+svm_metrics <- calculate_and_print_metrics(svm_model, test_data, test_data$yearly_percent_positive)
+svm_vals <- print_metrics(svm_metrics, "SVM Model")
+svm_pred <- svm_metrics$predictions
+svm_qq_plot <- qq_plot_residuals(svm_model, test_data, 'yearly_percent_positive')
+svm_err_heatmap <- error_distribution_heatmap(svm_model, test_data, 'yearly_percent_positive')
+# svm_qq_plot
+# svm_err_heatmap
+
+
+# Gradient Boosting
+gbm_model <- train(yearly_percent_positive ~ yearly_avg, 
+                   data = train_data, 
+                   method = "gbm", 
+                   trControl = trainControl(method = "cv", number = 3), 
+                   tuneGrid = expand.grid(
+                     .n.trees = c(50, 100),
+                     .interaction.depth = c(1, 2),
+                     .shrinkage = 0.1,
+                     .n.minobsinnode = c(1, 3)  
+                   ),
+                   verbose = FALSE,
+                   bag.fraction = 0.7, 
+                   metric = "RMSE")
+
+gbm_metrics <- calculate_and_print_metrics(gbm_model, test_data, test_data$yearly_percent_positive)
+gbm_vals <- print_metrics(gbm_metrics, "Gradient Boosting Model")
+gbm_pred <- gbm_metrics$predictions
+gbmy_qq_plot <- qq_plot_residuals(gbm_model, test_data, 'yearly_percent_positive')
+gbmy_err_heatmap <- error_distribution_heatmap(gbm_model, test_data, 'yearly_percent_positive')
+gbmy_importance_heatmap <- feature_importance_heatmap(gbm_model)
+# gbmy_qq_plot
+# gbmy_err_heatmap
+# gbmy_importance_heatmap
+
+
+# Elastic Net
+all_year_levels <- union(levels(factor(train_data$year_of_record)),
+                         levels(factor(test_data$year_of_record)))
+train_data$year_of_record <- factor(train_data$year_of_record, levels = all_year_levels)
+test_data$year_of_record <- factor(test_data$year_of_record, levels = all_year_levels)
+en_model <- train(yearly_percent_positive ~ yearly_avg + year_of_record,
+                  data = train_data,
+                  method = "glmnet",
+                  tuneGrid = expand.grid(alpha = c(0, 1), lambda = seq(0.001, 0.1, by = 0.002)),
+                  trControl = trainControl(method = "cv", number = 5),
+                  metric = "RMSE")
+# en_model
+en_metrics <- calculate_and_print_metrics(en_model, test_data, test_data$yearly_percent_positive)
+en_vals <- print_metrics(en_metrics, "Elastic Net (Lasso and Ridge)")
+en_pred <- en_metrics$predictions
+eny_qq_plot <- qq_plot_residuals(en_model, test_data, 'yearly_percent_positive')
+eny_err_heatmap <- error_distribution_heatmap(en_model, test_data, 'yearly_percent_positive')
+eny_importance_heatmap <- feature_importance_heatmap(en_model)
+# eny_qq_plot
+# eny_err_heatmap
+# eny_importance_heatmap
+
+# Combine and view all metrics
+all_metrics <- list(
+  "Linear Regression" = lm_metrics,
+  "Random Forest" = rf_metrics,
+  "Gradient Boosting" = gbm_metrics,
+  "SVM" = svm_metrics, 
+  "Elastic Net" = en_metrics
+)
+is_valid_metrics <- function(metrics) {
+  return(!any(sapply(metrics, function(metric) any(is.na(metric)))))
+}
+all_metrics_df <- do.call(rbind, lapply(names(all_metrics), function(model_name) {
+  result <- all_metrics[[model_name]]
+  metrics <- result$metrics
+  if (is_valid_metrics(metrics)) {
+    data.frame(Model = model_name,
+               Correlation = metrics$Correlation,
+               R2 = metrics$R2,
+               RMSE = metrics$RMSE, 
+               MAE = metrics$MAE, 
+               MSE = metrics$MSE, 
+               MAPE = metrics$MAPE,
+               stringsAsFactors = FALSE)
+  } else {
+    warning(paste("Metrics for model", model_name, "are not valid and have been excluded."))
+    NULL
+  }
+}))
+
+all_metrics_df
+```
+
+```{r display yearly models, echo=TRUE, include=TRUE}
+all_metrics_df
+```
+Here, linear regression and elastic net showed the strongest positive correlations and similar performance in R2 values, RMSE, and MAE. However, SVM had the strongest negative correlation but the highest R squared value, suggesting that it was overfit.   
+
+
+```{r yearly model results visuals}
+yearly_scatter <- plot_ly() %>%
+  add_markers(x = test_data$yearly_percent_positive, y = lm_pred, name = 'Linear Regression', marker = list(color = colors5[1])) %>%
+  add_markers(x = test_data$yearly_percent_positive, y = rf_pred, name = 'Random Forest', marker = list(color = colors5[2])) %>%
+  add_markers(x = test_data$yearly_percent_positive, y = gbm_pred, name = 'Gradient Boosting', marker = list(color = colors5[3])) %>%
+  add_markers(x = test_data$yearly_percent_positive, y = svm_pred, name = 'SVM', marker = list(color = colors5[4])) %>%
+  add_markers(x = test_data$yearly_percent_positive, y = en_pred, name = 'Elastic Net', marker = list(color = colors5[5])) %>%
+  add_lines(x = range(test_data$yearly_percent_positive), y = range(test_data$yearly_percent_positive), 
+            line = list(dash = 'dash', color = 'red'), 
+            name = 'Ideal Fit') %>%
+  layout(title = "Figure 8: Actual vs Predicted Values",
+         xaxis = list(title = "Actual Values"),
+         yaxis = list(title = "Predicted Values"))
+
+yearly_residuals <- plot_ly() %>%
+  add_markers(x = lm_pred, y = test_data$yearly_percent_positive - lm_pred, name = 'Linear Regression', marker = list(color = colors5[1])) %>%
+  add_markers(x = rf_pred, y = test_data$yearly_percent_positive - rf_pred, name = 'Random Forest', marker = list(color = colors5[2])) %>%
+  add_markers(x = gbm_pred, y = test_data$yearly_percent_positive - gbm_pred, name = 'Gradient Boosting', marker = list(color = colors5[3])) %>%
+  add_markers(x = svm_pred, y = test_data$yearly_percent_positive - svm_pred, name = 'SVM', marker = list(color = colors5[4])) %>%
+  add_markers(x = en_pred, y = test_data$yearly_percent_positive - en_pred, name = 'Elastic Net', marker = list(color = colors5[5])) %>%
+  layout(title = "Figure 9: Residuals vs Fitted Values",
+         xaxis = list(title = "Fitted Values"),
+         yaxis = list(title = "Residuals"))
+
+yearly_model_correlations <- plot_ly(
+  data = all_metrics_df,
+  x = ~reorder(Model, -Correlation),
+  y = ~Correlation,
+  type = 'bar',
+  marker = list(color = colors1),
+  text = ~round(Correlation, 3),
+  textposition = 'auto'
+) %>%
+  layout(
+    title = "Figure 10: Correlation between Actual & Predicted Values\n of Different Models of Yearly Data",
+    xaxis = list(title = "Model", tickangle = -45),
+    yaxis = list(title = "Correlation"),
+    margin = list(b = 160, t = 70)
+  )
+
+eny_importance_heatmap <- eny_importance_heatmap %>%
+  layout(title = "Figure 11: Heatmap of Important Yearly Features")
+
+yearly_scatter
+yearly_residuals
+yearly_model_correlations
+eny_importance_heatmap
+```
+
+
+```{r display fig8, echo=TRUE, include=TRUE}
+yearly_scatter
+```
+
+**Figure 8:** The actual vs. predicted values from the models trained on yearly data. The ideal fit is denoted by a red dotted line, and the closer the values are to the line, the better the models' performance.  
+
+Here, the Linear Regression, SVM, and Gradient Boosting models visually look good. However, further analysis is required to determine the best option. 
+  
+```{r display fig9, echo=TRUE, include=TRUE}
+yearly_residuals
+```
+**Figure 9:** The residuals from the models vs the fitted values. The more randomly scattered the data points are around the 0 line, the better the model performance.   
+
+Here there is a slight negative linear trend, possibly suggesting that the relationship between the variables yearly_avg_temp and yearly_percent_positive is non-linear.  
+   
+```{r display fig10, echo=TRUE, include=TRUE}
+yearly_model_correlations
+```
+**Figure 10:** A plot of the correlations between the actual and predicted values for each model (how well the model's predictions matched the actual values). More positive values indicate a better model performance. 
+
+Linear Regression and Elastic net are equally as accurate in this analysis, with gradient boosting, random forest, and SVM performing poorly.   
+  
+```{r display fig11, echo=TRUE, include=TRUE}
+eny_importance_heatmap
+```
+**Figure 11:** A visual of the most important factors contributing to the models performance to predict the average percent positive per year depending on the average yearly temperature. 
+
+The most important years were 2004, 2009, 2012, 2014 and 2023. These signify the years that have the highest percentage of people testing positive for the flu. Intuitively, 2009 is the highest temporal predictor. However, the yearly average temperature did not contribute significantly to the model's performance.    
+
+
+
+In evaluating the performance of different predictive models, it is important to see how they learn and perform with different partitions of training sets.  
+
+```{r learning curves yearly}
+suppressWarnings(suppressMessages({
+  if (length(unique(train_data$yearly_percent_positive)) == 2) {
+    cat("Warning: The outcome variable has only two unique values. This may indicate a classification problem.\n")
+  }
+
+  compute_learning_curves <- function(model_method, formula, data, train_control, tune_grid = NULL) {
+    train_errors <- c()
+    val_errors <- c()
+    training_sizes <- seq(0.1, 1.0, by = 0.1)
+    for (training_size in training_sizes) {
+      sample_indices <- sample(nrow(data), size = as.integer(training_size * nrow(data)))
+      train_subset <- data[sample_indices, ]
+      model <- tryCatch({
+        suppressWarnings(suppressMessages(
+          train(formula,
+                data = train_subset,
+                method = model_method,
+                trControl = train_control,
+                tuneGrid = tune_grid)
+        ))
+      }, error = function(e) {
+        return(NULL)
+      })
+      if (!is.null(model)) {
+        train_pred <- predict(model, train_subset)
+        train_error <- RMSE(train_pred, train_subset$yearly_percent_positive)
+        train_errors <- c(train_errors, train_error)
+        val_errors <- c(val_errors, min(model$results$RMSE, na.rm = TRUE))
+      } else {
+        train_errors <- c(train_errors, NA)
+        val_errors <- c(val_errors, NA)
+      }
+    }
+    return(list(train_errors = train_errors, val_errors = val_errors, sizes = training_sizes))
+  }
+  set.seed(1998)
+  train_control <- trainControl(method = "cv", number = 5)
+
+  # Linear Model
+  lm_curves <- compute_learning_curves("lm", yearly_percent_positive ~ yearly_avg, train_data, train_control)
+
+  # Random Forest
+  rf_curves <- compute_learning_curves("rf", yearly_percent_positive ~ yearly_avg, 
+                                       train_data, train_control, 
+                                       tune_grid = data.frame(mtry = 1))
+
+  # SVM
+  svm_curves <- compute_learning_curves("svmRadial", yearly_percent_positive ~ yearly_avg, train_data, train_control)
+
+  # Gradient Boosting
+  gbm_tune <- expand.grid(
+    .n.trees = c(50, 100),
+    .interaction.depth = c(1, 2),
+    .shrinkage = 0.1,
+    .n.minobsinnode = c(1, 3)
+  )
+  gbm_curves <- compute_learning_curves("gbm", yearly_percent_positive ~ yearly_avg, train_data, train_control, tune_grid = gbm_tune)
+
+
+  # Elastic Net Regularization
+  en_tune <- expand.grid(alpha = c(0, 1), lambda = seq(0.001, 0.1, by = 0.002))
+  en_curves <- compute_learning_curves("glmnet", yearly_percent_positive ~ yearly_avg + year_of_record,
+                                       train_data, train_control, 
+                                       tune_grid = en_tune)
+
+  # Plot Learning Curves
+  learning_curve_plot1 <- plot_ly()
+  learning_curve_plot1 <- add_trace(learning_curve_plot1, x = lm_curves$sizes, y = lm_curves$train_errors, type = 'scatter', mode = 'lines',
+                                    name = "Linear Model - Training Error", line = list(dash = 'solid', color = colors5[1]))
+  learning_curve_plot1 <- add_trace(learning_curve_plot1, x = lm_curves$sizes, y = lm_curves$val_errors, type = 'scatter', mode = 'lines',
+                                    name = "Linear Model - Validation Error", line = list(dash = 'dot', color = colors5[1]))
+  learning_curve_plot1 <- add_trace(learning_curve_plot1, x = rf_curves$sizes, y = rf_curves$train_errors, type = 'scatter', mode = 'lines', 
+                 name = "Random Forest - Training Error", line = list(dash = 'solid', color = colors5[2]))
+  learning_curve_plot1 <- add_trace(learning_curve_plot1, x = rf_curves$sizes, y = rf_curves$val_errors, type = 'scatter', mode = 'lines', 
+                 name = "Random Forest - Validation Error", line = list(dash = 'dot', color = colors5[2]))
+  learning_curve_plot1 <- add_trace(learning_curve_plot1, x = svm_curves$sizes, y = svm_curves$train_errors, type = 'scatter', mode = 'lines', 
+                 name = "SVM - Training Error", line = list(dash = 'solid', color = colors5[3]))
+  learning_curve_plot1 <- add_trace(learning_curve_plot1, x = svm_curves$sizes, y = svm_curves$val_errors, type = 'scatter', mode = 'lines', 
+                 name = "SVM - Validation Error", line = list(dash = 'dot', color = colors5[3]))
+  learning_curve_plot1 <- add_trace(learning_curve_plot1, x = gbm_curves$sizes, y = gbm_curves$train_errors, type = 'scatter', mode = 'lines', 
+                 name = "Gradient Boosting - Training Error", line = list(dash = 'solid', color = colors5[4]))
+  learning_curve_plot1 <- add_trace(learning_curve_plot1, x = gbm_curves$sizes, y = gbm_curves$val_errors, type = 'scatter', mode = 'lines', 
+                 name = "Gradient Boosting - Validation Error", line = list(dash = 'dot', color = colors5[4]))
+  learning_curve_plot1 <- add_trace(learning_curve_plot1, x = en_curves$sizes, y = en_curves$train_errors, type = 'scatter', mode = 'lines', 
+                 name = "Elastic Net - Training Error", line = list(dash = 'solid', color = colors5[5]))
+  learning_curve_plot1 <- add_trace(learning_curve_plot1, x = en_curves$sizes, y = en_curves$val_errors, type = 'scatter', mode = 'lines', 
+                 name = "Elastic Net - Validation Error", line = list(dash = 'dot', color = colors5[5]))
+  learning_curve_plot1 <- layout(learning_curve_plot1, title = "Figure 12: Learning Curves of Models During Yearly Training",
+              xaxis = list(title = 'Training Set Size'),
+              yaxis = list(title = 'Error'),
+              legend = list(orientation = 'v'))
+  learning_curve_plot1
+}))
+```
+
+
+```{r display fig12, echo=TRUE, include=TRUE}
+learning_curve_plot1
+```
+**Figure 12:** The learning curves for the 5 different models on the aggregated yearly data across different partitions of training data. 
+
+There are numerous insights to draw from inspection of the learning curves. The training error typically decreases as the training set increases due to more information provided to the model, and more from the model to learn from. Validation error may decrease with more training data as the model can be more accurately generalized. Validation error plateaus when there is an indication of overfitting (the model complexity is too high compared to the amount of data). Underfitting is signified when training error is low but validation error is high. Ideally, the training and validation errors are low and converge as the training set size increases, signifying that the model is neither overfitting or underfitting the data. 
+
+The yearly learning curves reinforce that linear regression is the best fit for the data. The data converges at a relatively low error. Elastic Net also shows similar results, aligning with the previous conclusions that these were the two best models for yearly data. Interestingly, all models perform relatively strongly at a partition of 0.4. 
+
+
+## Monthly Examination
+Second, as mentioned in methods, the aggregated monthly data will be examined and models will be trained on the monthly data to examine if there are differences in accuracy with more data.  
+
+### Correlations
+First, it is important to look at the correlations between the percent of the population that tests positive for influenza and the average monthly temperature. 
+```{r monthly correlation original, echo=TRUE, include=TRUE}
+set.seed(1998)
+combined_data2$total_incidence <- as.numeric(combined_data2$total_incidence)
+combined_data2$average_temp <- as.numeric(combined_data2$average_temp)
+combined_data2$percent_positive <- as.numeric(combined_data2$percent_positive)
+
+# Total Incidence
+correlation_pearson_ti2 <- cor(combined_data2$total_incidence, combined_data2$average_temp, use = "complete.obs", method = "pearson")
+correlation_spearman_ti2 <- cor(combined_data2$total_incidence, combined_data2$average_temp, use = "complete.obs", method = "spearman")
+cat("Total Incidence Correlation:\nPearson correlation: ", correlation_pearson_ti2, "\nSpearman correlation: ", correlation_spearman_ti2, "\n")
+
+# Percent Positive
+correlation_pearson_pp2 <- cor(combined_data2$percent_positive, combined_data2$average_temp, use = "complete.obs", method = "pearson")
+correlation_spearman_pp2 <- cor(combined_data2$percent_positive, combined_data2$average_temp, use = "complete.obs", method = "spearman")
+cat("\nPercent Positive Correlation:\nPearson correlation: ", correlation_pearson_pp2, "\nSpearman correlation: ", correlation_spearman_pp2)
+```
+If we analyze total incidence, both the Pearson and Spearman correlations are negative, which indicates an inverse relationship with average temperature (as temperature goes down, incidence goes up). The relationship is weakly negative linearly (Pearson) but moderately negative when comparing rank order (Spearman).   
+  
+Examining percent_positive, both the Pearson and Spearman correlations are strongly negative both linearly and when considering rank order. This indicates that there is a stronger inverse relationship between percent_positive and average temperature than with total incidence. We expect to see this with monthly data.  
+
+
+### Monthly Model Training and Evaluation
+The training and testing data are evaluated against each other to see if their correlations between the two variables in question (percent_positive and average_temp) are relatively close. This tells us whether or not the testing data is similar to the training data, and gives us an idea if of the models' performance.
+
+```{r monthly setup}
+set.seed(1998)
+trainIndex2 <- createDataPartition(combined_data2$total_incidence, p = 0.7, list = FALSE, times = 1)
+train_data2 <- combined_data2[trainIndex2,]
+test_data2 <- combined_data2[-trainIndex2,]
+
+correlation_result_monthly1 <- calculate_correlation(test_data2, "average_temp", "percent_positive", "Test Data 2")
+correlation_result_monthly2 <- calculate_correlation(train_data2, "average_temp", "percent_positive", "Train Data 2")
+
+# Heatmap for combined monthly data
+year_levels <- levels(train_data2$year_of_record)
+month_levels <- levels(train_data2$month)
+train_data2$year_of_record_num <- as.numeric(train_data2$year_of_record)
+train_data2$month_num <- as.numeric(train_data2$month)
+cor_matrix2 <- cor(train_data2[, c("year_of_record_num", "month_num", "average_temp", "total_incidence", "percent_positive")], use = "complete.obs")
+heatmap_cor2 <- plot_ly(
+  x = colnames(cor_matrix2),
+  y = colnames(cor_matrix2),
+  z = cor_matrix2,
+  type = "heatmap",
+  colors = colorRamp(c(colors5))
+) %>%
+  layout(
+    title = "Figure 13: Feature Correlation Matrix Heat Map",
+    xaxis = list(title = ""),
+    yaxis = list(title = "")
+  )
+heatmap_cor2
+
+# fix the data for further analysis
+train_data2$year_of_record <- factor(train_data2$year_of_record, levels = year_levels)
+train_data2$month <- factor(train_data2$month, levels = month_levels)
+train_data2$year_of_record_num <- NULL
+train_data2$month_num <- NULL
+```
+
+```{r display fig13, include=TRUE, echo=TRUE}
+correlation_result_monthly1 <- calculate_correlation(test_data2, "average_temp", "percent_positive", "Test Data 2")
+correlation_result_monthly2 <- calculate_correlation(train_data2, "average_temp", "percent_positive", "Train Data 2")
+
+heatmap_cor2
+```
+**Figure 13:** Heatmap of the correlations in the dataframe 'combined_data2'. The correlation between the monthly average temperature and the monthly percent of the population positive for influenza is -0.54 whereas the correlation between the yearly average temperature and the yearly total incidence of influenza is -0.25.  
+  
+The correlations of the testing dataset here (-0.53) and the training dataset (-0.57) match closely with each other when using a partition of 0.7, meaning that both training and testing sets are comparable, and with the actual correlation of -0.57. This makes sense as there is more data to factor in with monthly aggregates as compared to the yearly data. Although the typical partition to use when training is 80%, due to the high comparability between the training and testing correlations, the following models will be trained on the 70/30 partition.     
+
+
+```{r monthly models}
+set.seed(11302024)
+
+# Linear Regression
+lm_model2 <- train(percent_positive ~ average_temp + year_of_record + month, 
+                  data = train_data2, 
+                  method = "lm")
+lm_metrics2 <- calculate_and_print_metrics(lm_model2, test_data2, test_data2$percent_positive)
+lm_vals2 <- print_metrics(lm_metrics2, "Linear Model")
+lm_pred2 <- lm_metrics2$predictions
+lm_summary2 <- summary(lm_model2$finalModel)
+lmm_qq_plot <- qq_plot_residuals(lm_model2, test_data2, 'percent_positive')
+lmm_err_heatmap <- error_distribution_heatmap(lm_model2, test_data2, 'percent_positive')
+lmm_importance_heatmap <- feature_importance_heatmap(lm_model2)
+# lm_summary2
+# lmm_qq_plot
+# lmm_err_heatmap
+# lmm_importance_heatmap
+
+
+# Random Forest
+rf_model2 <- train(percent_positive ~ average_temp + year_of_record  + month, 
+                  data = train_data2, 
+                  method = "rf", 
+                  trControl = trainControl(method = "cv", number = 5,))
+rf_metrics2 <- calculate_and_print_metrics(rf_model2, test_data2, test_data2$percent_positive)
+rf_vals2 <- print_metrics(rf_metrics2, "Random Forest Model")
+rf_pred2 <- rf_metrics2$predictions
+residuals <- test_data2$percent_positive - rf_pred2
+rfm_importance <- varImp(rf_model2, scale = FALSE)
+rfm_qq_plot <- qq_plot_residuals(rf_model2, test_data2, 'percent_positive')
+rfm_err_heatmap <- error_distribution_heatmap(rf_model2, test_data2, 'percent_positive')
+rfm_importance_heatmap <- feature_importance_heatmap(rf_model2)
+# rfm_qq_plot
+# rfm_err_heatmap
+# rfm_importance_heatmap
+
+
+# Support Vector Matrix
+svm_model2 <- train(percent_positive ~ average_temp + year_of_record  + month, 
+                   data = train_data2, 
+                   method = "svmRadial", 
+                   trControl = trainControl(method = "cv", number = 5))
+svm_metrics2 <- calculate_and_print_metrics(svm_model2, test_data2, test_data2$percent_positive)
+svm_vals2 <- print_metrics(svm_metrics2, "SVM Model")
+svm_pred2 <- svm_metrics2$predictions
+svmm_qq_plot <- qq_plot_residuals(svm_model2, test_data2, 'percent_positive')
+svmm_err_heatmap <- error_distribution_heatmap(svm_model2, test_data2, 'percent_positive')
+# svmm_qq_plot
+# svmm_err_heatmap
+
+
+# Gradient Boosting
+gbm_model2 <- train(percent_positive ~ average_temp + year_of_record  + month, 
+                   data = train_data2, 
+                   method = "gbm", 
+                   trControl = trainControl(method = "cv", number = 5),
+                   verbose = FALSE)
+gbm_metrics2 <- calculate_and_print_metrics(gbm_model2, test_data2, test_data2$percent_positive)
+print_metrics(gbm_metrics2, "Gradient Boosting Model")
+gbm_pred2 <- gbm_metrics2$predictions
+gbmm_qq_plot <- qq_plot_residuals(gbm_model2, test_data2, 'percent_positive')
+gbmm_err_heatmap <- error_distribution_heatmap(gbm_model2, test_data2, 'percent_positive')
+gbmm_importance_heatmap <- feature_importance_heatmap(gbm_model2)
+# gbmm_qq_plot
+# gbmm_err_heatmap
+# gbmm_importance_heatmap
+
+
+# Elastic Net
+en_model2 <- train(percent_positive ~ average_temp + year_of_record  + month, 
+                     data = train_data2, 
+                     method = "glmnet",
+                     tuneGrid = expand.grid(alpha = c(0, 1), lambda = seq(0.001, 0.1, by = 0.002)),
+                     trControl = trainControl(method = "cv", number = 5))
+# en_model2
+
+en_metrics2 <- calculate_and_print_metrics(en_model2, test_data2, test_data2$percent_positive)
+en_vals2 <- print_metrics(en_metrics2, "Elastic Net (Lasso and Ridge)")
+en_pred2 <- en_metrics2$predictions
+enm_qq_plot <- qq_plot_residuals(en_model2, test_data2, 'percent_positive')
+enm_err_heatmap <- error_distribution_heatmap(en_model2, test_data2, 'percent_positive')
+enm_importance_heatmap <- feature_importance_heatmap(en_model2)
+# enm_qq_plot
+# enm_err_heatmap
+# enm_importance_heatmap
+
+
+# Monthly Metrics 
+all_metrics2 <- list(
+  "Linear Regression" = lm_metrics2,
+  "Random Forest" = rf_metrics2,
+  "Gradient Boosting" = gbm_metrics2,
+  "SVM" = svm_metrics2, 
+  "Elastic Net" = en_metrics2
+)
+is_valid_metrics <- function(metrics) {
+  return(!any(sapply(metrics, function(metric) any(is.na(metric)))))
+}
+all_metrics_df2 <- do.call(rbind, lapply(names(all_metrics), function(model_name) {
+  result2 <- all_metrics2[[model_name]]
+  metrics <- result2$metrics
+  if (is_valid_metrics(metrics)) {
+    data.frame(Model = model_name, 
+               Correlation = metrics$Correlation,
+               R2 = metrics$R2,
+               RMSE = metrics$RMSE, 
+               MAE = metrics$MAE, 
+               MSE = metrics$MSE,
+               stringsAsFactors = FALSE)
+  } else {
+    warning(paste("Metrics for model", model_name, "are not valid and have been excluded."))
+    NULL
+  }
+}))
+all_metrics_df2
+```
+
+```{r display monthly models, echo=TRUE, include=TRUE}
+all_metrics_df2
+```
+The random forest model stands out as the best performing model across all metrics. It has the highest correlation and R2, and the lowest error values. The gradient boosting model did not perform well with the monthly data. SVM, linear regression, and elastic net are all close to top performers, with SVM having slightly better performance across all metrics behind random forest. 
+
+```{r monthly model results visuals}
+monthly_scatter <- plot_ly() %>%
+  add_markers(x = test_data2$percent_positive, y = lm_pred2, name = 'Linear Regression', marker = list(color = colors5[1])) %>%
+  add_markers(x = test_data2$percent_positive, y = rf_pred2, name = 'Random Forest', marker = list(color = colors5[2])) %>%
+  add_markers(x = test_data2$percent_positive, y = gbm_pred2, name = 'Gradient Boosting', marker = list(color = colors5[3])) %>%
+  add_markers(x = test_data2$percent_positive, y = svm_pred2, name = 'SVM', marker = list(color = colors5[4])) %>%
+  add_markers(x = test_data2$percent_positive, y = en_pred2, name = 'Elastic Net', marker = list(color = colors5[5])) %>%
+  add_lines(x = range(test_data2$percent_positive), y = range(test_data2$percent_positive), 
+            line = list(dash = 'dash', color = 'red'), 
+            name = 'Ideal Fit') %>%
+layout(title = "Figure 14: Actual vs Predicted Values",
+         xaxis = list(title = "Actual Values"),
+         yaxis = list(title = "Predicted Values"))
+
+monthly_residuals <- plot_ly() %>%
+  add_markers(x = lm_pred2, y = test_data2$percent_positive - lm_pred2, name = 'Linear Regression', marker = list(color = colors5[1])) %>%
+  add_markers(x = rf_pred2, y = test_data2$percent_positive - rf_pred2, name = 'Random Forest', marker = list(color = colors5[2])) %>%
+  add_markers(x = gbm_pred2, y = test_data2$percent_positive - gbm_pred2, name = 'Gradient Boosting', marker = list(color = colors5[3])) %>%
+  add_markers(x = svm_pred2, y = test_data2$percent_positive - svm_pred2, name = 'SVM', marker = list(color = colors5[4])) %>%
+  add_markers(x = en_pred2, y = test_data2$percent_positive - en_pred2, name = 'Elastic Net', marker = list(color = colors5[5])) %>%
+  layout(title = "Figure 15: Residuals vs Fitted Values",
+         xaxis = list(title = "Fitted Values"),
+         yaxis = list(title = "Residuals"))
+
+monthly_model_correlations <- plot_ly(
+  data = all_metrics_df2,
+  x = ~reorder(Model, -Correlation),
+  y = ~Correlation,
+  type = 'bar',
+  marker = list(color = colors1),
+  text = ~round(Correlation, 3),
+  textposition = 'auto'
+) %>%
+  layout(
+    title = "Figure 16: Correlation between Actual & Predicted Values\n of Different Models of Monthly Data",
+    xaxis = list(title = "Model", tickangle = -45),
+    yaxis = list(title = "Correlation"),
+    margin = list(b = 160, t = 70)
+  )
+
+rfm_importance_heatmap <- rfm_importance_heatmap %>%
+  layout(title = "Figure 17: Heatmap of Important Monthly Features")
+
+
+monthly_scatter
+monthly_residuals
+monthly_model_correlations
+rfm_importance_heatmap
+```
+
+```{r display fig14, echo=TRUE, include=TRUE}
+monthly_scatter
+```
+
+**Figure 14:** The actual vs. predicted values from the models trained on monthly data. The ideal fit is denoted by a red dotted line, and the closer the values are to the line, the better the models' performance.    
+
+All models perform relatively well here. Based on visual inspection, linear regression and elastic net are better than the others. Gradient Boosting does not do very well predicting above values of 16.
+  
+```{r display fig15, echo=TRUE, include=TRUE}
+monthly_residuals
+```
+**Figure 15:** The residuals from the models vs the fitted values. The more randomly scattered the data points are around the 0 line, the better the model performance. 
+
+Here there is a negative linear trend, suggesting that the relationship between the variables average_temp and percent_positive is non-linear.    
+    
+```{r display fig16, echo=TRUE, include=TRUE}
+monthly_model_correlations
+```
+**Figure 16:** A plot of the correlations between the actual and predicted values for each model. More positive values indicate a better model performance. 
+
+All models performed well, however, Random Forest performed slightly better among all options.  
+
+```{r display fig17, echo=TRUE, include=TRUE}
+rfm_importance_heatmap
+```
+**Figure 17:** A visual of the important factors that contributed to the model being able to predict the percent_positive.   
+
+The most important features were average_temp, the years 2009, 2012, and 2021, and the months February, January, and October.  
+  
+  
+As with the yearly models, identifying how the models learn over different partitioned training sets is important to understand their behavior and inform future recommendations for partitions. 
+```{r learning curves monthly}
+suppressWarnings(suppressMessages({
+  if (length(unique(train_data2$percent_positive)) == 2) {
+    cat("Warning: The outcome variable has only two unique values. This may indicate a classification problem.\n")
+  }
+  if (is.factor(train_data2$percent_positive)) {
+    train_data2$percent_positive <- as.numeric(as.character(train_data2$percent_positive))
+  }
+  compute_learning_curves <- function(model_method, formula, data, train_control, tune_grid = NULL) {
+    train_errors <- c()
+    val_errors <- c()
+    training_sizes <- seq(0.1, 1.0, by = 0.1)
+    for (training_size in training_sizes) {
+      sample_indices <- sample(nrow(data), size = as.integer(training_size * nrow(data)))
+      train_subset <- data[sample_indices, ]
+      model <- tryCatch({
+        train(formula,
+              data = train_subset,
+              method = model_method,
+              trControl = train_control,
+              tuneGrid = tune_grid)
+      }, error = function(e) {
+        return(NULL)
+      })
+      if (!is.null(model)) {
+        train_pred <- predict(model, train_subset)
+        train_error <- RMSE(train_pred, train_subset$percent_positive)
+        train_errors <- c(train_errors, train_error)
+        val_errors <- c(val_errors, min(model$results$RMSE, na.rm = TRUE)) 
+      } else {
+        train_errors <- c(train_errors, NA)
+        val_errors <- c(val_errors, NA)
+      }
+    }
+    return(list(train_errors = train_errors, val_errors = val_errors, sizes = training_sizes))
+  }
+  set.seed(1998)
+train_control2 <- trainControl(method = "cv", number = 5)
+
+  lm_curves2 <- compute_learning_curves("lm", percent_positive ~ average_temp, train_data2, train_control2)
+  rf_curves2 <- compute_learning_curves("rf", percent_positive ~ average_temp, train_data2, train_control2, tune_grid = data.frame(mtry = 1))
+  svm_curves2 <- compute_learning_curves("svmRadial", percent_positive ~ average_temp, train_data2, train_control2)
+  gbm_tune2 <- expand.grid(
+    .n.trees = c(50, 100),
+    .interaction.depth = c(1, 2),
+    .shrinkage = 0.1,
+    .n.minobsinnode = c(1, 3)
+  )
+  gbm_curves2 <- compute_learning_curves("gbm", percent_positive ~ average_temp, train_data2, train_control2, tune_grid = gbm_tune)
+  en_tune2 <- expand.grid(alpha = c(0, 1), lambda = seq(0.001, 0.1, by = 0.002))
+  en_curves2 <- compute_learning_curves("glmnet", percent_positive ~ average_temp + year_of_record, train_data2, train_control2, tune_grid = en_tune)
+
+  # Plot
+  learning_curve_plot2 <- plot_ly()
+  learning_curve_plot2 <- add_trace(learning_curve_plot2, x = lm_curves2$sizes, y = lm_curves2$train_errors, type = 'scatter', mode = 'lines', 
+               name = "Linear Model - Training Error", line = list(dash = 'solid', color = colors5[1]))
+  learning_curve_plot2 <- add_trace(learning_curve_plot2, x = lm_curves2$sizes, y = lm_curves2$val_errors, type = 'scatter', mode = 'lines', 
+               name = "Linear Model - Validation Error", line = list(dash = 'dot', color = colors5[1]))
+  learning_curve_plot2 <- add_trace(learning_curve_plot2, x = rf_curves2$sizes, y = rf_curves2$train_errors, type = 'scatter', mode = 'lines', 
+               name = "Random Forest - Training Error", line = list(dash = 'solid', color = colors5[2]))
+  learning_curve_plot2 <- add_trace(learning_curve_plot2, x = rf_curves2$sizes, y = rf_curves2$val_errors, type = 'scatter', mode = 'lines', 
+               name = "Random Forest - Validation Error", line = list(dash = 'dot', color = colors5[2]))
+  learning_curve_plot2 <- add_trace(learning_curve_plot2, x = svm_curves2$sizes, y = svm_curves2$train_errors, type = 'scatter', mode = 'lines', 
+               name = "SVM - Training Error", line = list(dash = 'solid', color = colors5[3]))
+  learning_curve_plot2 <- add_trace(learning_curve_plot2, x = svm_curves2$sizes, y = svm_curves2$val_errors, type = 'scatter', mode = 'lines', 
+               name = "SVM - Validation Error", line = list(dash = 'dot', color = colors5[3]))
+  learning_curve_plot2 <- add_trace(learning_curve_plot2, x = gbm_curves2$sizes, y = gbm_curves2$train_errors, type = 'scatter', mode = 'lines', 
+               name = "Gradient Boosting - Training Error", line = list(dash = 'solid', color = colors5[4]))
+  learning_curve_plot2 <- add_trace(learning_curve_plot2, x = gbm_curves2$sizes, y = gbm_curves2$val_errors, type = 'scatter', mode = 'lines', 
+               name = "Gradient Boosting - Validation Error", line = list(dash = 'dot', color = colors5[4]))
+  learning_curve_plot2 <- add_trace(learning_curve_plot2, x = en_curves2$sizes, y = en_curves2$train_errors, type = 'scatter', mode = 'lines', 
+               name = "Elastic Net - Training Error", line = list(dash = 'solid', color = colors5[5]))
+  learning_curve_plot2 <- add_trace(learning_curve_plot2, x = en_curves2$sizes, y = en_curves2$val_errors, type = 'scatter', mode = 'lines', 
+               name = "Elastic Net - Validation Error", line = list(dash = 'dot', color = colors5[5]))
+  learning_curve_plot2 <- layout(learning_curve_plot2, title = "Figure 18: Learning Curves of Models During Monthly Data",
+              xaxis = list(title = 'Training Set Size'),
+              yaxis = list(title = 'Error'),
+              legend = list(orientation = 'v'))
+  learning_curve_plot2
+}))
+```
+
+```{r display fig18, echo=TRUE, include=TRUE}
+learning_curve_plot2
+```
+
+**Figure 18:** The learning curves for the 5 different models on the monthly data across different partitions of training data. The lower the error, the better the model performance. These learning curves validate the previous results, showing Random Forest having the best performance.  
+
+The best performing models here are the random forest and elastic net models, mirroring previous results from error distribution, correlation tests, and metric analysis. The monthly models had higher errors than the yearly models, but overall had higher performance and prediction accuracy than the yearly models. 
+  
+## Future Predictions
+
+```{r future predicitions yearly}
+suppressWarnings(suppressMessages({
+
+  # Predict future temperatures
+  trend_model <- lm(yearly_avg ~ year_of_record, data = combined_data)
+  future_years <- data.frame(year_of_record = 2025:2050)
+  predicted_temperatures <- predict(trend_model, future_years)
+
+  # Predict future incidence
+  future_data <- data.frame(year_of_record = future_years$year_of_record, predicted_temperature = predicted_temperatures)
+  future_temp_data <- data.frame(yearly_avg = predicted_temperatures)
+
+  # Linear Regression Model
+  lm_model <- lm(yearly_percent_positive ~ yearly_avg, data = combined_data)
+
+  # SVM Model
+  svm_model <- svm(yearly_percent_positive ~ yearly_avg, data = combined_data)
+
+  # Gradient Boosting Model
+  dtrain <- xgb.DMatrix(data = as.matrix(combined_data$yearly_avg), label = combined_data$yearly_percent_positive)
+  xgb_params <- list(objective = "reg:squarederror", max_depth = 3, eta = 0.1, nrounds = 100)
+  xgboost_model <- xgboost(params = xgb_params, data = dtrain, nrounds = 100)
+  dtest <- xgb.DMatrix(as.matrix(future_temp_data$yearly_avg))
+
+  # Random Forest Model
+  random_forest_model <- randomForest(yearly_percent_positive ~ yearly_avg, data = combined_data)
+
+  # Predict future flu incidences using each model
+  predicted_flu_incidence_lm <- predict(lm_model, newdata = future_temp_data)
+  predicted_flu_incidence_svm <- predict(svm_model, newdata = future_temp_data)
+  predicted_flu_incidence_xgboost <- predict(xgboost_model, newdata = dtest)
+  predicted_flu_incidence_rf <- predict(random_forest_model, newdata = future_temp_data)
+
+  # Combine predictions
+  future_flu_data <- data.frame(
+    year_of_record = future_years$year_of_record,
+    predicted_temperature = predicted_temperatures,
+    predicted_flu_incidence_lm = predicted_flu_incidence_lm,
+    predicted_flu_incidence_svm = predicted_flu_incidence_svm,
+    predicted_flu_incidence_xgboost = predicted_flu_incidence_xgboost,
+    predicted_flu_incidence_rf = predicted_flu_incidence_rf
+  )
+
+
+}))
+
+# Plot results
+future_yearly_vis <- plot_ly(future_flu_data, 
+                      x = ~year_of_record, 
+                      y = ~predicted_flu_incidence_lm, 
+                      z = ~predicted_temperature, 
+                      type = 'scatter3d', 
+                      mode = 'markers', 
+                      name = 'Linear Regression', 
+                      marker = list(color = colors4[1])) %>%
+  add_trace(y = ~predicted_flu_incidence_svm, 
+            name = 'SVM', 
+            marker = list(color = colors4[2])) %>%
+  add_trace(y = ~predicted_flu_incidence_xgboost, 
+            name = 'XGBoost', 
+            marker = list(color = colors4[3])) %>%
+  add_trace(y = ~predicted_flu_incidence_rf, 
+            name = 'Random Forest', 
+            marker = list(color = colors4[4])) %>%
+  layout(
+    title = 'Figure 19: Predicted Future Yearly Percent Positive from Different Models',
+    scene = list(
+      xaxis = list(title = 'Year'),
+      yaxis = list(title = 'Predicted Percent Positive'),
+      zaxis = list(title = 'Predicted Temperature')
+    )
+  )
+
+future_yearly_vis
+```
+
+Future predictions were calculated by forecasting the average temperature from the existing trend line using a linear regression model. Then, these temperatures were used in 4 models (linear regression, SVM, XGBoost, and random forest) to predict the percent positive rate for the years 2025 - 2020. 
+```{r display fig19, echo=TRUE, include=TRUE}
+future_yearly_vis
+```
+**Figure 19:** This figure shows the predicted values of average yearly percent positive and average yearly temperature from the years 2025 - 2050.  
+  
+Unsurprisingly, the random forest and SVM models both had sub-par performance, with incidence rates unchanging with the yearly and temperature differences. As Linear regression showed the highest performance in the initial training, we can infer that this is the most accurate model when using yearly data to predict future flu epidemics. The linear regression model shows the average yearly percentage of the population that tests positive for influenza decreasing from 6.59% in 2025 to 5.29% in 2050. However, linear regression may not capture all of the important factors that influence this prediction.   
+
+  
+Given the possible limitations with using only aggregated yearly data to predict future epidemics, it is important to look at how the models perform when monthly data is used.  
+  
+```{r future predictions monthly linear}
+# Generate future data
+combined_data2$month <- as.factor(combined_data2$month)
+combined_data2$year_of_record <- as.numeric(combined_data2$year_of_record)
+temp_model <- lm(average_temp ~ year_of_record + month, data = combined_data2)
+future_years <- expand.grid(year_of_record = 25:50, month = levels(combined_data2$month))
+future_years$month <- as.factor(future_years$month)
+
+# Predict future temperatures
+predicted_temperatures <- predict(temp_model, newdata = future_years)
+future_data <- cbind(future_years, average_temp = predicted_temperatures)
+future_data$average_temp[future_data$average_temp > 100] <- 100
+
+# Run predictive model 
+percent_model <- lm(percent_positive ~ average_temp, data = combined_data2)
+predicted_percent_positive <- predict(percent_model, newdata = future_data)
+predicted_percent_positive[predicted_percent_positive < 0] <- 0
+
+# Visualize results
+prediction_results <- data.frame(
+  year_of_record = future_data$year_of_record + 2000,
+  month = future_data$month,
+  predicted_temp = future_data$average_temp,
+  predicted_percent_positive = predicted_percent_positive
+)
+months_ordered <- factor(prediction_results$month, 
+                         levels = c("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"))
+viridis_colors <- viridis_pal(option = "D")(length(levels(months_ordered)))
+month_colors <- setNames(viridis_colors, levels(months_ordered))
+
+future_monthly_vis1 <- plot_ly(prediction_results, 
+                      x = ~year_of_record, 
+                      y = ~predicted_percent_positive, 
+                      z = ~predicted_temp, 
+                      type = 'scatter3d', 
+                      mode = 'markers', 
+                      color = ~month, 
+                      colors = month_colors) %>%
+  layout(
+    title = 'Figure 20: Predicted Future Monthly Percent Positive\n using Linear Regression',
+    scene = list(
+      xaxis = list(title = 'Year'),
+      yaxis = list(title = 'Predicted Percent Positive'),
+      zaxis = list(title = 'Predicted Temperature')
+    )
+  )
+
+future_monthly_vis1
+```
+
+```{r display fig20, echo=TRUE, include=TRUE}
+future_monthly_vis1
+```
+
+**Figure 20:** This figure shows the predicted values of average monthly percent positive and average monthly temperature for the years 2025 - 2050 using a linear regression model . Color signifies the month.  
+
+This model performs relatively well, with temperature trends following the expectation of warmer months increasing and colder months decreasing; reinforcing that climate change causes more extreme weather. Additionally, the percent positive rates of influenza decrease with time, aligning with previous literature on the topic. This model does very well with continuing the prediction beyond 1 year, a limitation of previous research on this topic.   
+
+As random forest performed well when validating, a random forest model will also be evaluated here to examine its performance on future predictions.  
+```{r future monthly predicitons random forest}
+
+# predicting average temperature
+temp_model_rf <- randomForest(average_temp ~ year_of_record + month, data = combined_data2)
+future_years <- expand.grid(year_of_record = 25:50, month = levels(combined_data2$month))
+future_years$month <- as.factor(future_years$month)
+
+# Predict future temperatures
+predicted_temperatures <- predict(temp_model_rf, newdata = future_years)
+future_data <- cbind(future_years, average_temp = predicted_temperatures)
+future_data$average_temp[future_data$average_temp > 100] <- 100
+
+# predicting percent positive
+percent_model_rf <- randomForest(percent_positive ~ average_temp, data = combined_data2)
+predicted_percent_positive <- predict(percent_model_rf, newdata = future_data)
+predicted_percent_positive[predicted_percent_positive < 0] <- 0
+
+# Visualize results
+prediction_results <- data.frame(
+  year_of_record = future_data$year_of_record + 2000,
+  month = future_data$month,
+  predicted_temp = future_data$average_temp,
+  predicted_percent_positive = predicted_percent_positive
+)
+months_ordered <- factor(prediction_results$month, 
+                         levels = c("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"))
+viridis_colors <- viridis_pal(option = "D")(length(levels(months_ordered)))
+month_colors <- setNames(viridis_colors, levels(months_ordered))
+
+future_monthly_vis2 <- plot_ly(prediction_results, 
+                              x = ~year_of_record, 
+                              y = ~predicted_percent_positive, 
+                              z = ~predicted_temp, 
+                              type = 'scatter3d', 
+                              mode = 'markers', 
+                              color = ~month, 
+                              colors = month_colors) %>%
+  layout(
+    title = 'Figure 21: Predicted Future Monthly Percent Positive\n using Random Forest',
+    scene = list(
+      xaxis = list(title = 'Year'),
+      yaxis = list(title = 'Predicted Percent Positive'),
+      zaxis = list(title = 'Predicted Temperature')
+    )
+  )
+
+future_monthly_vis2
+```
+
+```{r display fig21, echo=TRUE, include=TRUE}
+future_monthly_vis2
+```
+
+**Figure 21:** This figure shows the predicted values of average monthly percent positive and average monthly temperature for the years 2025 - 2050 using a random forest model. Color signifies the month.  
+
+This model performs well up until 2028, however, after 2028 the values do not change. This signifies good short-term predictive performance, but sub-par long-term predictions. This finding aligns with previous research about the limitation of the use of similar predicitive models beyond one year. 
+
+# Discussion 
+The relationship between climate change and influenza incidence is a pressing yet understudied area that has the potential for significant public health implications. This study explored the relationship by leveraging historical influenza and meteorological datasets to develop predictive models with the objective to identify potential correlations between climate factors and flu incidence, testing and validating various predictive models, and evaluating the model's ability to forecast influenza trends beyond one year.  
+  
+Two main phases of the project, yearly and monthly, yielded different, yet important results.
+
+## Yearly Analysis
+During the yearly data analysis, both the Pearson and Spearman correlations for the total annual incidence of influenza were positive but moderate, indicating that as the average temperature increases, total annual influenza incidences also increase. However, the correlations for percentage of the population positive was generally weaker and negative, suggesting a more complex and perhaps non-linear relationship between temperature and influenza incidence.  
+  
+While training predictive models on yearly data, linear regression and elastic net models exhibited the strongest performance, with relatively high R2 values and moderate MAEs. The support vector machine showed the highest R2 value, but also indicated signs of overfitting from its higher RMSE and lower correlation overall.  
+  
+The learning curves showed that all the models improved as the training set size increased, although linear regression and elastic net models converged more quickly and displayed lower errors overall, indicating that these models were likely more effective in capturing the yearly trends in the data within the range used. 
+
+## Monthly Analysis
+
+When examining monthly aggregates, the correlations between average temperature and total incidence, as well as percentage positive, were generally strong and negative. This signifies a more pronounced and consistent inverse relationship at the monthly level compared to yearly aggregates.  
+  
+All models showed improved performance when trained on monthly data. The random forest model, in particular, outperformed others in terms of RMSE, MAE, and R2, indicating its robustness in capturing the nuances of monthly influenza patterns. This suggests that models benefit from the finer granularity of monthly data, which likely captures seasonal variations better than yearly data.  
+  
+The learning curves for monthly data models generally corroborated the finding that model performance improves with larger, more detailed datasets. All models showed a decline in error as the training set size increased, with random forest and support vector machine showing particularly strong performance.  
+  
+Two future predictions were used on the monthly models to evaluate their usefulness. First, the linear regression model accurately produced different numbers from 2025 - 2050, following expected trends. Temperatures of the warmer months increased, and temperatures for colder months decreased, following the prediction that climate change causes more extreme temperature fluctuations (Ebi et al., 2021). The total percent of the population positive for influenza decreased slightly, also following the predictions of previous research (Baker et al., 2021). Overall, the linear model performed well in predicting future temperatures given current trends and future flu incidence rates. 
+
+Given the superior performance during validation, the random forest model was also employed to predict future influenza trends. Although the random forest predictions initially seem to be more accurate than the linear model, it has significantly less accuracy beyond 3 years into the future. The rates for 2028 - 2050 remained constant, both for temperature and flu rates. However, the rates for 2025 - 2028 fluctuate as observed in the original data. 
+
+The differences in these model predictions and accuracy can be plausibly attributed to three different factors: (1) limited data scope, (2) non-linear relationships, or (3) computational inefficiencies. First, there was a limited scope of available data. Meteorological data did not include specific humidity, elevation patterns, or other potentially important weather patterns. Second, the data could be non-linearly related which would limit the capability of the models to predict future values. Finally, computational inefficiencies related to the training and validation of the models or computational power available contribute to the models' limitations. 
+
+## Conclusion
+The findings of this study revealed several critical insights and underscored the intricate relationship between meteorological factors and influenza incidence in the United States. 
+
+The observed correlations between meteorological variables and influenza incidences were significant. Yearly and monthly data analysis indicated that influenza rates have an inverse correlation with temperature, with monthly data showing a stronger relationship than yearly data. Specifically, colder temperatures corresponded to higher flu incidences. Seasonal patters became evident when analyzing monthly data, aligning with existing literature that suggests increased influenza transmission during colder months.  
+
+Multiple predictive models were tested using both yearly and monthly data. Linear regression and elastic net models showed strong performance with yearly data. Random forest and support vector machines demonstrated superior performance with monthly data. These modes can be used to capture finer seasonal variations, given that there is sufficient monthly data to do so. These models were validated using metrics such as RMSE, MAE, and R2 values, underscoring the robustness of the predictive modeling power, particularly in regards to monthly data.  
+
+Using linear regression and random forest models, future influenza incidences from 2025 - 2050 were predicted with varying results. The linear regression model performed consistently well, capturing gradual changes in influenza incidences and temperatures. The random forest model provided reliable short-term predictions but struggled with long-term forecasting. This result mirrors existing challenges in extending predictive accuracy beyond one year. However, it was able to reliably predict up to 3 years in the future. Overall, linear models were more reliable for long-term forecasts, while random forest models yielded better short-term predictions.  
+
+Future reporting standards for climate data and influenza data should focus on monthly, if not weekly, data. This study highlights the crucial intersection between climate change and public health, underscoring the importance of continued research and development of robust predictive models to mitigate future influenza outbreaks in the context of a rapidly changing climate. 
+
+## Limitations
+There are numerous factors that contributed to the limited scope, generality, and applicability of these predictive models: (1) inherent data limitations, (2) correlation strength, and (3) population trend assumptions. 
+
+1. The influenza data spanned from 1997 - 2024 whereas the climate data spanned back to 1895. This potentially influenced the long-term trend analysis and contributed to the limited accuracy of long-term predictions. Weekly aggregation was limited to monthly data, which involved assumptions about the distribution of flu cases within months. As 53 weeks were given due to leap years, months were separated with the following week indexes:   
+      
+    january = 1 - 4  
+    february = 5 - 8  
+    march = 9 - 12  
+    april = 13 - 16  
+    may = 17 - 21  
+    june = 22 - 25  
+    july = 26 - 29  
+    august = 30 - 33  
+    september = 34 - 38  
+    october = 39 - 43  
+    november = 44 - 48  
+    december = 49 - 53  
+
+2. While significant, the correlations between meteorological variables and influenza incidences were not robust enough to explain all of the variation. Possible non-linear relationships may exist that were not captured by the models. 
+3. The analysis assumed consistent population trends, somewhat mitigated by the use of percent positive instead of total incidence to analyze influenza data. Future studies should integrate population dynamics into the predictive models for more accurate forecasts. 
+
+## Future Recommendations
+Future research should take into account the limitations of this study in order to more accurately and comprehensively forecast future influenza epidemics. A wider range of meteorological factors should be incorporated, including but not limited to humidity, elevation, predictable climate patterns like La Niña and El Niño, and data about natural disasters. Exploring non-linear models and machine learning techniques might better capture the intricate relationships between climate and influenza variables. Accurate population projections should be included to adjust for demographic changes and migration patterns. Additionally, leveraging advanced computational power will enable more complex model training and validation, which could improve the long-term predictive capabilities. The addition of these factors will provide a more holistic and comprehensive understanding of future influenza dynamics. 
+
+
+# Acknowledgements
+I would like to extend my acknowledgements to Professor Ivo Dinov for his support and instruction throughout the Fall 2024 semester. His impact on my education cannot be understated. I would also like to give thanks to the staff at the Center for Healthcare Engineering & Patient Safety for providing the use of a loaner computer when my device broke, allowing me to complete this project on-time. Finally, recognition is due to the various researchers and scientists whose foundational work this study builds upon. 
+
+# References
+Axelsen, J. B., Yaari, R., Grenfell, B. T., & Stone, L. (2014). Multiannual forecasting of seasonal influenza dynamics reveals climatic and evolutionary drivers. Proceedings of the National Academy of Sciences, 111(26), 9538–9542. https://doi.org/10.1073/pnas.1321656111  
+  
+Baker, R. E., Yang, Q., Worby, C. J., Yang, W., Saad-Roy, C. M., Viboud, C., Shaman, J., Metcalf, C. J. E., Vecchi, G., & Grenfell, B. T. (2021). Implications of climatic and demographic change for seasonal influenza dynamics and evolution (p. 2021.02.11.21251601). medRxiv. https://doi.org/10.1101/2021.02.11.21251601  
+
+Bolles, D. (2024, October 10). Extreme Weather and Cimate Change. NASA Science. https://science.nasa.gov/climate-change/extreme-weather/  
+
+Ebi, K. L., Vanos, J., Baldwin, J. W., Bell, J. E., Hondula, D. M., Errett, N. A., Hayes, K., Reid, C. E., Saha, S., Spector, J., & Berry, P. (2021). Extreme Weather and Climate Change: Population Health and Health System Implications. Annual Review of Public Health, 42, 293–315. https://doi.org/10.1146/annurev-publhealth-012420-105026  
+
+Extreme Weather and Climate Change. (n.d.). Center for Climate and Energy Solutions. Retrieved December 10, 2024, from https://www.c2es.org/content/extreme-weather-and-climate-change/  
+
+Flahault, A., de Castaneda, R. R., & Bolon, I. (2016). Climate change and infectious diseases. Public Health Reviews, 37, 21. https://doi.org/10.1186/s40985-016-0035-2  
+
+Jilani, T. N., Jamil, R. T., Nguyen, A. D., & Siddiqui, A. H. (2024). H1N1 Influenza. In StatPearls. StatPearls Publishing. http://www.ncbi.nlm.nih.gov/books/NBK513241/  
+
+Lane, M. A., Walawender, M., Carter, J., Brownsword, E. A., Landay, T., Gillespie, T. R., Fairley, J. K., Philipsborn, R., & Kraft, C. S. (2022). Climate change and influenza: A scoping review. The Journal of Climate Change and Health, 5, 100084. https://doi.org/10.1016/j.joclim.2021.100084  
+
+Lee, J. J., & Wang, A. (2022, March 4). NASA Finds Each State Has Its Own Climatic Threshold for Flu Outbreaks. Climate Change: Vital Signs of the Planet. https://climate.nasa.gov/news/3150/nasa-finds-each-state-has-its-own-climatic-threshold-for-flu-outbreaks  
+
+Morris, D. H., Gostic, K. M., Pompei, S., Bedford, T., Łuksza, M., Neher, R. A., Grenfell, B. T., Lässig, M., & McCauley, J. W. (2018). Predictive modeling of influenza shows the promise of applied evolutionary biology. Trends in Microbiology, 26(2), 102–118. https://doi.org/10.1016/j.tim.2017.09.004  
+
+National Centers for Environmental Information, & National Oceanic and Atmospheric Administration. (n.d.-a). /Pub/data/normals/1981-2010/climate_codes [Txt]. NCEI NOAA Data Repository. Retrieved November 20, 2024, from https://www.ncei.noaa.gov/pub/data/normals/1981-2010/  
+
+National Centers for Environmental Information, & National Oceanic and Atmospheric Administration. (n.d.-b). /Pub/data/normals/1981-2010/climate_data_maximum [Txt]. NCEI NOAA Data Repository. Retrieved November 20, 2024, from https://www.ncei.noaa.gov/pub/data/normals/1981-2010/  
+
+National Centers for Environmental Information, & National Oceanic and Atmospheric Administration. (n.d.-c). /Pub/data/normals/1981-2010/climate_data_minimum [Txt]. NCEI NOAA Data Repository. Retrieved November 20, 2024, from https://www.ncei.noaa.gov/pub/data/normals/1981-2010/  
+
+National Centers for Environmental Information (NCEI). (n.d.). Retrieved December 10, 2024, from https://www.ncei.noaa.gov/  
+
+Serman, E., Thrastarson, H. Th., Franklin, M., & Teixeira, J. (2022). Spatial Variation in Humidity and the Onset of Seasonal Influenza Across the Contiguous United States. GeoHealth, 6(2), e2021GH000469. https://doi.org/10.1029/2021GH000469  
+
+World Health Organization, National Respiratory and Enteric Virus Surveillance System, IliNet, & Centers for Disease Control and Prevention. (2024). National, Regional, and State Level Outpatient Illness and Viral Surveillance (Version 2024) [Dataset; Csv]. FluView. https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
