@@ -1,5 +1,5 @@
 # Nikki Watson's Project Portfolio
-Welcome to my GitHub repository! This collection showcases my data science, engineering, and analytics projects developed during my studies and professional experiences. Below you'll find summaries of each project, including descriptions, methodologies, technologies used, and links to browse the respective project repositories.
+Welcome to my GitHub repository! This collection showcases my data science, engineering, and analytics projects developed during my studies and professional experiences. Below you'll find summaries of each project, including descriptions, methodologies, technologies used.
 
 ## Projects
 1. Optimal Sequencing of Biologic Treatment Progression in Crohn’s Disease
