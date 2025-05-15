@@ -23,9 +23,9 @@ Welcome to my GitHub repository! This collection showcases my data science, engi
 *Highlights:* Processed multi-omic data sets using snATAC-seq and snRNA-seq, conducted pathway enrichment analysis, and identified significant differences in immune and cell cycle pathways between healthy and disease cohorts.  
 
 5. **Notion Dashboard Template for Academic, Professional, and Personal Organization**  
-*Description:* A comprehensive Notion dashboard template designed to streamline task management across three key areas of life: academic pursuits, professional development, and personal growth. This template offers tailored tools and features to enhance productivity and organization in each domain.
-*Technologies:* Notion
-*Highlights:* Features modules for tracking assignments and deadlines in the academic category, project management and career planning tools in the professional section, and habit tracking along with personal journaling in the personal area. Suitable for students and professionals seeking a centralized platform to manage diverse responsibilities efficiently.
+*Description:* A comprehensive Notion dashboard template designed to streamline task management across three key areas of life: academic pursuits, professional development, and personal growth. This template offers tailored tools and features to enhance productivity and organization in each domain.  
+*Technologies:* Notion  
+*Highlights:* Features modules for tracking assignments and deadlines in the academic category, project management and career planning tools in the professional section, and habit tracking along with personal journaling in the personal area. Suitable for students and professionals seeking a centralized platform to manage diverse responsibilities efficiently.  
 
 
 ## Skills and Technologies
