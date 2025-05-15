@@ -1,5 +1,5 @@
 # Nikki Watson's Project Portfolio
-Welcome to my GitHub repository! This collection showcases my data science, engineering, and analytics projects developed during my studies and professional experiences. Below you'll find summaries of each project, including descriptions, methodologies, technologies used, and links to browse the respective project repositories.
+Welcome to my GitHub repository! This collection showcases my data science, engineering, and analytics projects developed during my studies and professional experiences. Below you'll find summaries of each project, including descriptions, methodologies, technologies used.
 
 ## Projects
 1. Optimal Sequencing of Biologic Treatment Progression in Crohn’s Disease
@@ -26,7 +26,7 @@ Highlights: Analyzed historical data, developed models to predict flu trends con
 ## About Me
 I'm a Master's student in Industrial and Operations Engineering and Data Science at the University of Michigan. My focus areas include Human Factors Engineering, Data Analytics, and exploring the intersection of technology and healthcare to improve decision-making and patient outcomes.
 
-**Contact:** Nikki Watson  
+*Contact:* Nikki Watson  
 *Email:* nikkiwat@umich.edu
 
 ## Acknowledgments
