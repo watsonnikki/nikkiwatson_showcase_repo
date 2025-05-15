@@ -7,24 +7,31 @@ Description: Explores the impact of treatment sequencing on Crohn's Disease outc
 Technologies: Python, Computational Modeling  
 Highlights: Analyzed biologic treatment efficacy, providing insights into optimal sequencing strategies.  
 
-3. Analytics Dashboard for U.S. Chronic Disease Indicators
+2. Analytics Dashboard for U.S. Chronic Disease Indicators
 Description: Developed an interactive dashboard using Plotly Dash to visualize and analyze chronic disease data.  
 Technologies: Python, Plotly Dash, Machine Learning  
 Highlights: Created 15+ interactive visualizations and a predictive analytics pipeline; deployed on Google Cloud Platform.
 
-5. Climate & Contagion: Effects of Global Warming on Flu Incidence
+3. Climate & Contagion: Effects of Global Warming on Flu Incidence
 Description: Examines the correlation between climate change and flu incidences in the U.S.  
 Technologies: R, Plotly, Machine Learning  
 Highlights: Analyzed historical data, developed models to predict flu trends considering climate factors.  
 
+4. Chrons Disease Genomics: Integrative Multi-omic Approaches to Characterization of Crohn’s Disease Immune 
+Profiles in Peripheral Blood Mononuclear Cells
+Description: Investigates distinct transcription factor binding and gene expression profiles in peripheral blood mononuclear cells of Crohn's Disease patients compared to healthy controls. This project aims to enhance the understanding of immune dysregulation in Crohn's Disease using a multi-omic analysis approach.  
+Technologies: R, Seurat, Nextflow, Bioinformatics Tools (fastQC, BWA, MACS2)  
+Highlights: Processed multi-omic data sets using snATAC-seq and snRNA-seq, conducted pathway enrichment analysis, and identified significant differences in immune and cell cycle pathways between healthy and disease cohorts.  
+
+
 ## Skills and Technologies
 **Programming Languages:** Python, R, Bash  
-**Frameworks and Libraries:** Plotly Dash, Scikit-learn, NumPy, Pandas  
-**Tools and Platforms:** Google Cloud Platform, Git, GitHub  
+**Frameworks and Libraries:** Plotly Dash, Scikit-learn, NumPy, Pandas, SQL  
+**Tools and Platforms:** Google Cloud Platform, Git, Jira, Notion  
 **Areas of Expertise:** Data Analytics, Predictive Modeling, Machine Learning, Computational Simulation  
 
 ## About Me
-I'm a Master's student in Industrial and Operations Engineering and Data Science at the University of Michigan. My focus areas include Human Factors Engineering, Data Analytics, and exploring the intersection of technology and healthcare to improve decision-making and patient outcomes.
+I'm a recent graduate of the Master's program in Industrial and Operations Engineering and Data Science at the University of Michigan. My focus areas include Data Analytics and Computational Simulation and exploring the intersection of technology and healthcare to improve decision-making and patient outcomes.
 
 *Contact:* Nikki Watson  
 *Email:* nikkiwat@umich.edu
