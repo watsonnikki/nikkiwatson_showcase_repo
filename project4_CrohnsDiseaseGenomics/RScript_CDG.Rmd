@@ -1,0 +1,600 @@
+---
+title: 'bioinf545 project'
+author: "<h3>Nikki Watson</h3>"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    theme: spacelab
+    highlight: tango
+    toc: yes
+    number_sections: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+    code_folding: show
+    self_contained: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  word_document:
+    toc: yes
+    toc_depth: '3'
+tags:
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r update}
+# R.version.string
+# if (!requireNamespace("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager")
+# 
+# # Install clusterProfiler
+# BiocManager::install("clusterProfiler")
+# BiocManager::install("org.Hs.eg.db")
+# BiocManager::install("GO.db")
+# BiocManager::install("SingleR")
+# BiocManager::install("celldex")
+```
+
+
+```{r load packages}
+library(ggplot2)
+library(Seurat)
+library(dplyr)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(enrichplot)
+library(GO.db)
+library(celldex)
+library(SingleR)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+```
+
+3 = control
+4 = disease
+
+```{r library prep}
+# Pool 3
+data_dir3 <- "C:/Users/User/University of Michigan Dropbox/Nikki Watson/HP Backup/umich/courses/bioinf545/project/Pool3_ad"
+adata3 <- Read10X(data.dir = data_dir3)
+seurat_object3 <- CreateSeuratObject(counts = adata3[["Gene Expression"]]) 
+
+# Pool 4
+data_dir4 <- "C:/Users/User/University of Michigan Dropbox/Nikki Watson/HP Backup/umich/courses/bioinf545/project/Pool4_ad"
+adata4 <- Read10X(data.dir = data_dir4)
+seurat_object4 <- CreateSeuratObject(counts = adata4[["Gene Expression"]])
+
+```
+
+
+```{r count}
+calculate_cell_metrics <- function(seurat_object) {
+  # Use the correct layer, probably "counts", or check your specific Seurat object structure
+  counts_matrix <- GetAssayData(seurat_object, layer = "counts")
+  
+  # Calculate total counts per cell
+  seurat_object[["nCounts"]] <- Matrix::colSums(counts_matrix)
+  
+  # Calculate number of genes with counts per cell
+  seurat_object[["nGenes"]] <- Matrix::colSums(counts_matrix > 0)
+  
+  return(seurat_object)
+}
+
+# Pool 3
+seurat_object3 <- calculate_cell_metrics(seurat_object3)
+seurat_object4 <- calculate_cell_metrics(seurat_object4)
+```
+
+```{r QC}
+# Pool 3
+VlnPlot(seurat_object4, features = c("nCounts", "nGenes"), pt.size = 0.4)
+
+# Pool 4
+VlnPlot(seurat_object3, features = c("nCounts", "nGenes"), pt.size = 0.4)
+
+```
+
+```{r scatter plots}
+# Pool 3
+FeatureScatter(seurat_object3, feature1 = "nCounts", feature2 = "nGenes")
+
+# Pool 4
+FeatureScatter(seurat_object4, feature1 = "nCounts", feature2 = "nGenes")
+
+```
+
+```{r filter}
+filter_seurat_object <- function(seurat_object) {
+  # Filter cells with more than 500 counts
+  seurat_object <- subset(seurat_object, subset = nCounts > 500)
+
+  # Retrieve the correct data layer for counts
+  counts_data <- GetAssayData(seurat_object, layer = "counts")  # Adjust 'counts' to your actual data layer name if needed
+
+  # Check if retrieval is successful:
+  if(!is.null(counts_data)) {
+    # Filter genes present in at least 3 cells
+    expressed_genes <- rowSums(counts_data > 0) > 3
+    # Subset the Seurat object only to include those genes
+    seurat_object <- subset(seurat_object, features = names(which(expressed_genes)))
+  } else {
+    stop("Counts data could not be retrieved. Please check the data layer name.")
+  }
+  
+  return(seurat_object)
+}
+
+# Pool 3
+seurat_object3 <- filter_seurat_object(seurat_object3)
+seurat_object4 <- filter_seurat_object(seurat_object4)
+
+```
+
+```{r normalize}
+# Pool 3
+seurat_object3 <- NormalizeData(seurat_object3, normalization.method = "LogNormalize", scale.factor = 1e4)
+
+# Pool 4
+seurat_object4 <- NormalizeData(seurat_object4, normalization.method = "LogNormalize", scale.factor = 1e4)
+
+```
+
+```{r variable genes}
+# Pool 3
+seurat_object3 <- FindVariableFeatures(seurat_object3, selection.method = "vst", nfeatures = 2000)
+
+# Pool 4
+seurat_object4 <- FindVariableFeatures(seurat_object4, selection.method = "vst", nfeatures = 2000)
+
+```
+
+```{r plot variable}
+# Pool 3
+VariableFeaturePlot(seurat_object3)
+
+# Pool 4
+VariableFeaturePlot(seurat_object4)
+```
+
+```{r store raw}
+# Pool 3
+rna_counts3 <- GetAssayData(seurat_object3, layer = "counts") 
+seurat_object3 <- SetAssayData(seurat_object3, layer = "RNA_counts", new.data = rna_counts3)
+
+# Pool 4
+rna_counts4 <- GetAssayData(seurat_object4, layer = "counts")
+seurat_object4 <- SetAssayData(seurat_object4, layer = "RNA_counts", new.data = rna_counts4)
+
+```
+
+```{r scale}
+# Pool 3
+seurat_object3 <- ScaleData(seurat_object3, features = rownames(seurat_object3), maxChunkSize = 10)
+
+# Pool 4
+seurat_object4 <- ScaleData(seurat_object4, features = rownames(seurat_object4), maxChunkSize = 10)
+```
+
+```{r PCA}
+# Pool 3
+seurat_object3 <- RunPCA(seurat_object3, npcs = 50)
+
+# Pool 4
+seurat_object4 <- RunPCA(seurat_object4, npcs = 50)
+```
+
+```{r plot PCA}
+# Pool 3
+ElbowPlot(seurat_object3, ndims = 50)
+
+# Pool 4
+ElbowPlot(seurat_object4, ndims = 50)
+```
+
+```{r UMAP}
+# Pool 3
+seurat_object3 <- FindNeighbors(seurat_object3, dims = 1:40)
+seurat_object3 <- RunUMAP(seurat_object3, dims = 1:40)
+
+# Pool 4
+seurat_object4 <- FindNeighbors(seurat_object4, dims = 1:40)
+seurat_object4 <- RunUMAP(seurat_object4, dims = 1:40)
+```
+
+```{r clustering}
+# Pool 3
+seurat_object3 <- FindClusters(seurat_object3, resolution = 0.5)
+
+# Pool 4
+seurat_object4 <- FindClusters(seurat_object4, resolution = 0.5)
+```
+
+```{r plot UMAP}
+# Pool 3
+DimPlot(seurat_object3, reduction = "umap", group.by = "seurat_clusters", label = TRUE) +
+  labs(title = "UMAP Clusters - Pool 3 (Control)")
+FeaturePlot(seurat_object3, features = c("nCounts", "nGenes"))
+
+# Pool 4
+DimPlot(seurat_object4, reduction = "umap", group.by = "seurat_clusters", label = TRUE) +
+  labs(title = "UMAP Clusters - Pool 4 (Disease)")
+FeaturePlot(seurat_object4, features = c("nCounts", "nGenes"))
+```
+
+```{r marker genes}
+# Pool 3
+markers3 <- FindMarkers(seurat_object3, ident.1 = "0", test.use = "t")
+
+# Pool 4
+markers4 <- FindMarkers(seurat_object4, ident.1 = "0", test.use = "t")
+```
+
+```{r top markers}
+# Pool 3
+DoHeatmap(seurat_object3, features = head(rownames(seurat_object3), 20))
+
+# Pool 4
+DoHeatmap(seurat_object4, features = head(rownames(seurat_object4), 20))
+```
+
+
+Score cells for cell cycle phases. Assigns a score to each cell indicating its position in the cell cycle phases (G1, S, G2/M) based on gene expression patterns
+
+Used to determine if cell cycle effects influence data
+```{r cell cycle}
+s.genes <- Seurat::cc.genes$s.genes
+g2m.genes <- Seurat::cc.genes$g2m.genes
+
+# Pool 3
+seurat_object3 <- CellCycleScoring(seurat_object3, s.features = s.genes, g2m.features = g2m.genes)
+
+# Pool 4
+seurat_object4 <- CellCycleScoring(seurat_object4, s.features = s.genes, g2m.features = g2m.genes)
+
+# Visualize scores
+VlnPlot(seurat_object3, features = c("S.Score", "G2M.Score"))
+VlnPlot(seurat_object4, features = c("S.Score", "G2M.Score"))
+```
+
+
+Aligning cells across dataset to minimize batch effects
+```{r data integration}
+seurat_object_list <- list(pool3 = seurat_object3, pool4 = seurat_object4)
+
+# Identify integration anchors
+anchors <- FindIntegrationAnchors(object.list = seurat_object_list)
+
+# Integrate data
+integrated <- IntegrateData(anchorset = anchors)
+
+# Use integrated data for downstream analysis
+integrated <- ScaleData(integrated)
+integrated <- RunPCA(integrated)
+integrated <- RunUMAP(integrated, dims = 1:20)
+DimPlot(integrated, reduction = "umap", group.by = "orig.ident")
+```
+
+Identify genes that are differentially expressed between cluster
+Used for discovering markers of specific cell types or identifying genes linked to disease states
+```{r differential expression}
+#Pool 3
+markers3 <- FindAllMarkers(seurat_object3, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+markers3[1:20,]
+
+#Pool 4
+markers4 <- FindAllMarkers(seurat_object4, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+markers4[1:20,]
+```
+
+
+Assess which biological pathways are enriched among the differentially expressed genes, provide insights into function
+Identify key pathways involved
+```{r pathway analysis}
+# Pool 3
+gene_names <- markers3$gene
+log2fc_values <- markers3$avg_log2FC
+
+## convert gene symbols to ENTREZ IDs
+entrez_ids <- mapIds(
+  org.Hs.eg.db,
+  keys = gene_names,
+  column = "ENTREZID",
+  keytype = "SYMBOL",
+  multiVals = "first"  # getting the first mapped entry if there are multiple mappings
+)
+
+## remove NA and invalid ids
+valid_indices <- !is.na(entrez_ids) & entrez_ids != ""
+entrez_ids <- entrez_ids[valid_indices]
+log2fc_values <- log2fc_values[valid_indices]
+
+## combine to form a data frame
+mapped_data <- data.frame(entrez_id = entrez_ids, log2fc = log2fc_values)
+
+## resolve duplicates by selecting gene with highest log2fc value
+mapped_data <- mapped_data[order(abs(mapped_data$log2fc), decreasing = TRUE), ]  # Order by absolute log2fc
+mapped_data <- mapped_data[!duplicated(mapped_data$entrez_id), ]  # Remove duplicates, keeping the row with highest log2fc
+
+## create a named vector for geneList
+geneList <- mapped_data$log2fc
+names(geneList) <- mapped_data$entrez_id
+
+## sort geneList in decreasing order
+geneList <- sort(geneList, decreasing = TRUE)
+
+## check if there are still issues with geneList
+if (anyDuplicated(names(geneList)) || any(is.na(names(geneList)))) {
+  stop("GeneList still contains duplicate or invalid identifiers.")
+}
+
+## run gseGO
+enriched_pathways3 <- gseGO(
+  geneList = geneList,
+  OrgDb = org.Hs.eg.db,
+  keyType = "ENTREZID",
+  ont = "BP"
+)
+
+# Pool 4 markers
+gene_names <- markers4$gene
+log2fc_values4 <- markers4$avg_log2FC
+
+entrez_ids4 <- mapIds(
+  org.Hs.eg.db,
+  keys = gene_names,
+  column = "ENTREZID",
+  keytype = "SYMBOL",
+  multiVals = "first"  # getting the first mapped entry if there are multiple mappings
+)
+
+valid_indices4 <- !is.na(entrez_ids4) & entrez_ids4 != ""
+entrez_ids4 <- entrez_ids4[valid_indices4]
+log2fc_values4 <- log2fc_values4[valid_indices4]
+
+mapped_data4 <- data.frame(entrez_id = entrez_ids4, log2fc = log2fc_values4)
+
+mapped_data4 <- mapped_data4[order(abs(mapped_data4$log2fc), decreasing = TRUE), ]  # Order by absolute log2fc
+mapped_data4 <- mapped_data4[!duplicated(mapped_data4$entrez_id), ]  # Remove duplicates, keeping the row with highest log2fc
+
+geneList4 <- mapped_data4$log2fc
+names(geneList4) <- mapped_data4$entrez_id
+
+geneList4 <- sort(geneList4, decreasing = TRUE)
+
+if (anyDuplicated(names(geneList4)) || any(is.na(names(geneList4)))) {
+  stop("GeneList still contains duplicate or invalid identifiers.")
+}
+
+enriched_pathways4 <- gseGO(
+  geneList = geneList4,
+  OrgDb = org.Hs.eg.db,
+  keyType = "ENTREZID",
+  ont = "BP"
+)
+```
+
+```{r pathway analysis vis}
+get_top_pathways <- function(enrichment_result, top_n = 10) {
+  # Convert the gseGO result to a data frame
+  result_df <- as.data.frame(enrichment_result)
+  
+  # Sort by adjusted p-value or another metric
+  top_pathways <- head(result_df[order(result_df$p.adjust), ], top_n)
+  
+  return(top_pathways)
+}
+
+top_pathways3 <- get_top_pathways(enriched_pathways3, top_n = 10)
+top_pathways4 <- get_top_pathways(enriched_pathways4, top_n = 10)
+
+ggplot(top_pathways3, aes(x = reorder(Description, -NES), y = NES)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Top 10 Most Impacted Pathways - Pool 3",
+       x = "Pathway",
+       y = "Normalized Enrichment Score (NES)")
+
+ggplot(top_pathways4, aes(x = reorder(Description, -NES), y = NES)) +
+  geom_bar(stat = "identity", fill = "hotpink") +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Top 10 Most Impacted Pathways - Pool 4",
+       x = "Pathway",
+       y = "Normalized Enrichment Score (NES)")
+
+top_pathways3
+top_pathways4
+
+
+get_top_10_enriched <- function(enriched_results) {
+  result_df <- as.data.frame(enriched_results)
+  # Sort by adjusted p-value
+  top_10 <- result_df %>%
+    arrange(p.adjust) %>%
+    head(10) # Select the top 10 pathways
+  # Create a new enrichment result object from the filtered data
+  enriched_results@result <- enriched_results@result[row.names(enriched_results@result) %in% top_10$ID, ]
+  return(enriched_results)
+}
+
+top_enriched_3 <- get_top_10_enriched(enriched_pathways3)
+top_enriched_4 <- get_top_10_enriched(enriched_pathways4)
+
+ridgeplot(top_enriched_3) + theme(axis.text.y = element_text(size = 11)) + 
+  ggtitle("Top 10 Most Enriched Pathways - Pool 3")
+
+ridgeplot(top_enriched_4) + theme(axis.text.y = element_text(size = 11)) + 
+  ggtitle("Top 10 Most Enriched Pathways - Pool 4")
+```
+Control: The top pathways, such as "leukocyte activation" and "adaptive immune response," suggest that, in the control samples, there is a significant emphasis on immune-related pathways. This indicates that the immune system is actively engaging in normal homeostatic processes or potentially responding to regular environmental stimuli. Other top pathways like "regulation of immune system process" and "lymphocyte activation" demonstrate active regulation and initiation of immune processes in control conditions, which is expected as part of maintaining immune vigilance. The enrichment of "humoral immune response" and "immune effector process" pathways aligns with robust immune monitoring and potential response readiness, emphasizing both direct immune effector mechanisms and antibody-mediated responses.
+
+Disease: In the disease state, the predominantly enriched pathways involve processes related to cell cycle and mitotic activities, such as "metaphase chromosome alignment" and "regulation of mitotic nuclear division." This can suggest increased cell proliferation or alterations in cell cycle regulation, common in many disease states, especially cancers. Chromosome and Nuclear Division Pathways indicate a heightened focus on cell cycle checkpoints and mitotic fidelity, potentially reflecting how the disease condition impacts cellular replication or turnover. The significant enrichment in pathways like "regulation of nuclear division" and "chromosome localization" might suggest aberrations or heightened activity in transcriptional regulation, chromosome segregation, or mitotic control, frequently observed in malignancies or proliferative disorders.
+
+
+
+
+
+
+Visualize expression levels of specific genes on a dimensionality reduction plot
+Visualize where specific genes are upregulated
+
+
+Lets look specifically at immune cells
+```{r feature plots}
+# immune genes
+immune_genes <- AnnotationDbi::select(
+  org.Hs.eg.db,
+  keys = "GO:0006955",
+  keytype = "GOALL",
+  columns = c("ENTREZID", "SYMBOL")
+)
+immune_genes <- unique(immune_genes$SYMBOL)
+immune_genes3 <- immune_genes[immune_genes %in% rownames(seurat_object3)]
+immune_genes4 <- immune_genes[immune_genes %in% rownames(seurat_object4)]
+
+immune_genes3
+
+# FeaturePlot(seurat_object3, features = immune_genes3[1:10]) 
+# FeaturePlot(seurat_object4, features = immune_genes4[1:10]) 
+
+
+FeaturePlot(seurat_object3, features = c("NOD2", "IL2", "IL12", "IL23", "JAK1", "TNF", "JAK3", "A4B7", "ITGA4", "CD4", "CD8"))
+FeaturePlot(seurat_object4, features = c("NOD2", "IL2", "IL12", "IL23", "JAK1", "TNF", "JAK3", "A4B7", "ITGA4", "CD4", "CD8"))
+```
+
+
+
+
+
+```{r dot plot}
+# Top 20
+DotPlot(seurat_object3, features = unique(head(markers3$gene, 20))) + RotatedAxis()
+DotPlot(seurat_object4, features = unique(head(markers4$gene, 20))) + RotatedAxis()
+
+# Specific genes identified
+DotPlot(seurat_object3, features = c("NOD2", "IL2", "IL27", "IL23", "JAK1", "TNF", "JAK3", "A4B7", "ITGA4", "CD4", "CD8")) +
+  RotatedAxis() +
+  ggtitle("Expression of Selected Genes in the Control Group") +
+  theme(plot.title = element_text(hjust = 0.5, size = 14))
+
+DotPlot(seurat_object4, features = c("NOD2", "IL2", "IL27", "IL23", "JAK1", "TNF", "JAK3", "A4B7", "ITGA4", "CD4", "CD8")) +
+  RotatedAxis() +
+  ggtitle("Expression of Selected Genes in the Disease Group") +
+  theme(plot.title = element_text(hjust = 0.5, size = 14))
+
+```
+```{r selected genes}
+genes <- c("NOD2", "IL2", "IL27", "JAK1", "TNF", "JAK3", "ITGA4", "CD4")
+
+extract_gene_data <- function(seurat_obj, sample_name) {
+  data <- FetchData(seurat_obj, vars = genes) %>%
+    gather(key = "gene", value = "expression", genes) %>%
+    group_by(gene) %>%
+    summarise(average_expression = mean(expression, na.rm = TRUE)) %>%
+    mutate(sample = sample_name)
+  return(data)
+}
+
+control_data <- extract_gene_data(seurat_object3, "Control")
+disease_data <- extract_gene_data(seurat_object4, "Disease")
+
+combined_data <- bind_rows(control_data, disease_data) %>%
+  spread(key = "sample", value = "average_expression")
+
+combined_data %>%
+  kable("html", col.names = c("Gene", "Control", "Disease")) %>%
+  kable_styling(full_width = FALSE, bootstrap_options = "striped", position = "center")
+```
+
+```{r plot selection}
+genes <- c("NOD2", "IL2", "IL27", "JAK1", "TNF", "JAK3", "ITGA4", "CD4")
+
+extract_gene_data <- function(seurat_obj, cohort_name) {
+  # Use FetchData to get the desired data
+  data <- FetchData(seurat_obj, vars = genes) %>%
+    gather(key = "gene", value = "expression", genes) %>%
+    mutate(cohort = cohort_name)
+  return(data)
+}
+control_data <- extract_gene_data(seurat_object3, "Control")
+disease_data <- extract_gene_data(seurat_object4, "Disease")
+
+# Combine both datasets
+combined_data <- bind_rows(control_data, disease_data)
+
+# Plot using ggplot2
+ggplot(combined_data, aes(x = gene, y = expression, color = cohort)) +
+  geom_jitter(aes(shape = cohort), position = position_dodge(width = 0.5), alpha = 0.6) +
+  labs(title = "Expression of Selected Genes in Control and Disease Groups",
+       x = "Gene", y = "Expression Level") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5, size = 14)) +
+  scale_color_manual(values = c("Control" = "blue", "Disease" = "hotpink")) +
+  scale_shape_manual(values = c(16, 17))
+```
+
+
+
+
+
+predefined reference dataset HumanPrimaryCellAtlasData
+```{r cell identification}
+ref <- HumanPrimaryCellAtlasData()
+
+# expression matrix
+exp_matrix3 <- GetAssayData(seurat_object3, slot = "data")
+exp_matrix4 <- GetAssayData(seurat_object4, slot = "data")
+
+# singleR
+cell_types3 <- SingleR(test = exp_matrix3, ref = ref, labels = ref$label.main)
+cell_types4 <- SingleR(test = exp_matrix4, ref = ref, labels = ref$label.main)
+
+# annotations
+seurat_object3[['SingleR_labels']] <- cell_types3$labels
+seurat_object4[['SingleR_labels']] <- cell_types4$labels
+
+#vis
+DimPlot(seurat_object3, group.by = 'SingleR_labels', reduction = "umap") +
+  ggtitle("UMAP Plot for Pool 3 - Annotated with SingleR") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "UMAP 1", y = "UMAP 2")
+
+DimPlot(seurat_object4, group.by = 'SingleR_labels', reduction = "umap") +
+  ggtitle("UMAP Plot for Pool 4 - Annotated with SingleR") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "UMAP 1", y = "UMAP 2")
+```
+
+
+Displays expression of top marker genes across clusters
+```{r heatmaps}
+# Pool 3
+DoHeatmap(seurat_object3, features = head(markers3$gene, 10), size = 3) +
+  labs(title = "Top 10 Marker Genes Heatmap - Control") +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),  
+    axis.text.y = element_text(size = 10)
+  )
+# Pool 4
+DoHeatmap(seurat_object4, features = head(markers4$gene, 10), size = 3) +
+  labs(title = "Top 10 Marker Genes Heatmap - Disease") +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),  
+    axis.text.y = element_text(size = 10)
+  )
+
+```
