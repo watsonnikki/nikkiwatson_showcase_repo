@@ -27,6 +27,11 @@ Welcome to my GitHub repository! This collection showcases my data science, engi
 *Technologies:* Notion  
 *Highlights:* Features modules for tracking assignments and deadlines in the academic category, project management and career planning tools in the professional section, and habit tracking along with personal journaling in the personal area. Suitable for students and professionals seeking a centralized platform to manage diverse responsibilities efficiently.  
 
+6. **Technical Assessment - Financial Risk and Public Records**  
+*Description:* Examines relationships between two datasets, showcasing data science skills and applications in the financial domain.   
+*Technologies:* Python, Jupyter  
+*Highlights:* Features anomaly detection, risk assessment, and client profiling to determine overall probability of default.   
+
 
 ## Skills and Technologies
 **Programming Languages:** Python, R, Bash  
